@@ -67,6 +67,9 @@ class SensorData:
     
     @staticmethod
     def from_dict(data: dict) -> 'SensorData':
+        if not "sensor_type" in data:
+            raise ValueError("Missing sensor_type in data")
+        
         if data["sensor_type"] == "light":
             sensor_data = LightSensorData(**data["data"])
         elif data["sensor_type"] == "ultrasonic":
