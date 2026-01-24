@@ -1,0 +1,1 @@
+export type MQTTServerConnectionStatus = "disconnected" | "connecting" | "connected";
