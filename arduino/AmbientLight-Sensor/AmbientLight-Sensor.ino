@@ -4,41 +4,29 @@
 #include <ArduinoJson.h>
 #include "SparkFun_VEML6030_Ambient_Light_Sensor.h"
 
-// ====== CONFIGURACIÓN ======
+// ====== CONFIGURACION ======
 #define NODE_ID "LIGHT_01"
 #define LORA_FREQUENCY 868E6  // Europa: 868 MHz
-
-// Umbrales de luz para automatización
-#define LUX_MIN_THRESHOLD 200   // Abrir cortinas si está por debajo
-#define LUX_MAX_THRESHOLD 800   // Cerrar cortinas si está por encima
+#define SENSOR_TYPE "light"
 
 // ====== OBJETOS ======
 SparkFun_Ambient_Light light(0x48);
 
 // ====== VARIABLES GLOBALES ======
 unsigned long lastSendTime = 0;
-const unsigned long sendInterval = 30000;  // Enviar cada 30 segundos
+unsigned long sendInterval = 30000;  // Enviar cada 30 segundos
 float currentLux = 0;
 String lastCommand = "NONE";
-bool autoMode = true;
 
-// Control de transmisión
+// Control de transmision
 volatile bool txDoneFlag = true;
 volatile bool transmitting = false;
 
-// Configuración LoRa
-uint8_t currentSF = 12;        // SF máximo para largo alcance
-uint8_t currentPower = 20;     // Potencia máxima
-const uint8_t localAddress = 0xCC;  // Dirección de este nodo
-const uint8_t destination = 0xAA;   // Dirección del repetidor/gateway
-
-// Estructura de configuración
-struct Config {
-  float luxMinThreshold = LUX_MIN_THRESHOLD;
-  float luxMaxThreshold = LUX_MAX_THRESHOLD;
-  unsigned long sendInterval = 30000;
-  bool autoControlEnabled = true;
-} config;
+// Configuracion LoRa
+uint8_t currentSF = 12;
+uint8_t currentPower = 20;
+const uint8_t localAddress = 0xCC;
+const uint8_t destination = 0xAA;
 
 // Contadores
 uint16_t msgCount = 0;
@@ -48,13 +36,13 @@ uint16_t failedTx = 0;
 // ====== CALLBACKS LoRa ======
 void onTxDone() {
   txDoneFlag = true;
-  Serial.println("  ✓ TX completado");
+  Serial.println("  TX completado");
 }
 
 void onReceive(int packetSize) {
   if (packetSize == 0) return;
   
-  Serial.println("\n← Paquete LoRa recibido (" + String(packetSize) + " bytes)");
+  Serial.println("\nPaquete LoRa recibido (" + String(packetSize) + " bytes)");
   
   String received = "";
   while (LoRa.available()) {
@@ -68,17 +56,17 @@ void onReceive(int packetSize) {
   Serial.println("  RSSI: " + String(rssi) + " dBm | SNR: " + String(snr) + " dB");
   
   // Parsear JSON
-  StaticJsonDocument<256> doc;
+  StaticJsonDocument<512> doc;
   DeserializationError error = deserializeJson(doc, received);
   
   if (error) {
-    Serial.println("  ERROR: JSON inválido");
+    Serial.println("  ERROR: JSON invalido");
     return;
   }
   
   // Verificar que el mensaje es para este nodo
   String targetNode = doc["node_id"];
-  if (targetNode != NODE_ID) {
+  if (targetNode != "" && targetNode != NODE_ID) {
     Serial.println("  (Mensaje para otro nodo: " + targetNode + ")");
     return;
   }
@@ -100,10 +88,11 @@ void setup() {
   Serial.begin(115200);
   while (!Serial);
   
-  Serial.println("\n╔════════════════════════════════════════╗");
-  Serial.println("║   NODO SENSOR DE LUZ + LoRa            ║");
-  Serial.println("╚════════════════════════════════════════╝");
+  Serial.println("\n========================================");
+  Serial.println("   NODO SENSOR DE LUZ + LoRa");
+  Serial.println("========================================");
   Serial.println("ID: " + String(NODE_ID));
+  Serial.println("Tipo: " + String(SENSOR_TYPE));
   Serial.println();
   
   // ----------- SENSOR VEML6030 -----------
@@ -116,7 +105,7 @@ void setup() {
     while(1) delay(1000);
   }
   
-  Serial.println("✓ Sensor VEML6030 inicializado");
+  Serial.println("Sensor VEML6030 inicializado");
   light.setGain(1.0);
   light.setIntegTime(100);
   
@@ -129,34 +118,33 @@ void setup() {
     while(1) delay(1000);
   }
   
-  Serial.println("✓ LoRa inicializado correctamente");
+  Serial.println("LoRa inicializado correctamente");
   
-  // Configurar LoRa con parámetros robustos
-  LoRa.setSignalBandwidth(125E3);           // 125 kHz
-  LoRa.setSpreadingFactor(currentSF);       // SF12 = máximo alcance
-  LoRa.setCodingRate4(8);                   // 4/8 = máxima corrección
-  LoRa.setTxPower(currentPower);            // 20 dBm = potencia máxima
-  LoRa.setPreambleLength(16);               // Preámbulo largo para SF alto
-  LoRa.enableCrc();                         // CRC para integridad
-  LoRa.setSyncWord(0x12);                   // Sync word estándar
+  // Configurar LoRa
+  LoRa.setSignalBandwidth(125E3);
+  LoRa.setSpreadingFactor(currentSF);
+  LoRa.setCodingRate4(8);
+  LoRa.setTxPower(currentPower);
+  LoRa.setPreambleLength(16);
+  LoRa.enableCrc();
+  LoRa.setSyncWord(0x12);
   
   // Configurar callbacks
   LoRa.onTxDone(onTxDone);
   LoRa.onReceive(onReceive);
   
-  // Modo recepción
+  // Modo recepcion
   LoRa.receive();
   
-  Serial.println("\nConfiguración LoRa aplicada:");
+  Serial.println("\nConfiguracion LoRa aplicada:");
   Serial.println("  SF: " + String(currentSF));
   Serial.println("  BW: 125 kHz");
   Serial.println("  CR: 4/8");
   Serial.println("  Power: " + String(currentPower) + " dBm");
-  Serial.println("  Alcance estimado: ~15 km");
   
-  Serial.println("\n╔════════════════════════════════════════╗");
-  Serial.println("║          SISTEMA LISTO                 ║");
-  Serial.println("╚════════════════════════════════════════╝\n");
+  Serial.println("\n========================================");
+  Serial.println("          SISTEMA LISTO");
+  Serial.println("========================================\n");
   
   delay(2000);
 }
@@ -169,21 +157,16 @@ void loop() {
   String estado = getLightState(currentLux);
   
   // Mostrar lectura
-  Serial.println("═══════════════════════════════════════");
-  Serial.println("MEDICIÓN #" + String(msgCount));
-  Serial.println("───────────────────────────────────────");
+  Serial.println("=======================================");
+  Serial.println("MEDICION #" + String(msgCount));
+  Serial.println("---------------------------------------");
   Serial.println("  Luz: " + String(currentLux) + " lux");
   Serial.println("  ALS: " + String(als));
   Serial.println("  Estado: " + estado);
-  Serial.println("═══════════════════════════════════════");
+  Serial.println("=======================================");
   
-  // Control automático
-  if (config.autoControlEnabled) {
-    checkAutomationRules(currentLux);
-  }
-  
-  // Enviar datos periódicamente
-  if (millis() - lastSendTime > config.sendInterval) {
+  // Enviar datos periodicamente al maestro
+  if (millis() - lastSendTime > sendInterval) {
     sendSensorData(currentLux, als, estado);
     lastSendTime = millis();
   }
@@ -191,11 +174,11 @@ void loop() {
   delay(2000);
 }
 
-// ====== FUNCIONES DE COMUNICACIÓN ======
+// ====== FUNCIONES DE COMUNICACION ======
 
 void sendSensorData(float lux, unsigned long als, String estado) {
   if (transmitting) {
-    Serial.println("⚠ TX en curso, saltando envío");
+    Serial.println("TX en curso, saltando envio");
     return;
   }
   
@@ -204,109 +187,22 @@ void sendSensorData(float lux, unsigned long als, String estado) {
   doc["msg_type"] = "sensor_data";
   doc["timestamp"] = millis() / 1000;
   doc["msg_id"] = msgCount;
+  doc["sensor_type"] = SENSOR_TYPE;
   
   JsonObject data = doc.createNestedObject("data");
-  data["lux"] = round(lux * 10) / 10.0;  // 1 decimal
+  data["lux"] = round(lux * 10) / 10.0;
   data["als"] = als;
   data["estado"] = estado;
   
   String jsonString;
   serializeJson(doc, jsonString);
   
-  Serial.println("\n→ Enviando paquete #" + String(msgCount) + "...");
+  Serial.println("\nEnviando datos al maestro #" + String(msgCount) + "...");
   Serial.println("  Datos: " + jsonString);
-  Serial.println("  Tamaño: " + String(jsonString.length()) + " bytes");
   
-  // Preparar transmisión
-  transmitting = true;
-  txDoneFlag = false;
-  
-  // Enviar paquete
-  LoRa.beginPacket();
-  LoRa.write(destination);        // Destinatario
-  LoRa.write(localAddress);       // Remitente
-  LoRa.write((msgCount >> 8));    // ID alto
-  LoRa.write(msgCount & 0xFF);    // ID bajo
-  LoRa.print(jsonString);         // Payload
-  
-  if (LoRa.endPacket(true)) {     // true = async
-    Serial.println("Paquete enviado (async)");
-    successfulTx++;
-  } else {
-    Serial.println("Error al enviar");
-    failedTx++;
-    transmitting = false;
-  }
+  sendLoRaPacket(jsonString);
   
   msgCount++;
-  
-  // Esperar confirmación TX
-  unsigned long txStart = millis();
-  while (!txDoneFlag && (millis() - txStart < 5000)) {
-    delay(10);
-  }
-  
-  transmitting = false;
-  LoRa.receive();  // Volver a modo RX
-  
-  Serial.println("  Éxitos: " + String(successfulTx) + " | Fallos: " + String(failedTx));
-}
-
-void handleCommand(JsonDocument& doc) {
-  String action = doc["action"];
-  
-  Serial.println("→ Ejecutando comando: " + action);
-  
-  if (action == "open_curtains") {
-    openCurtains();
-    lastCommand = "OPEN";
-  } else if (action == "close_curtains") {
-    closeCurtains();
-    lastCommand = "CLOSE";
-  } else if (action == "request_data") {
-    float lux = light.readLight();
-    unsigned long als = light.readWhiteLight();
-    sendSensorData(lux, als, getLightState(lux));
-  } else if (action == "enable_auto") {
-    config.autoControlEnabled = true;
-    Serial.println("Modo automático ACTIVADO");
-  } else if (action == "disable_auto") {
-    config.autoControlEnabled = false;
-    Serial.println("Modo automático DESACTIVADO");
-  } else {
-    Serial.println(" Acción desconocida: " + action);
-  }
-}
-
-void handleConfig(JsonDocument& doc) {
-  Serial.println("→ Actualizando configuración...");
-  
-  bool changed = false;
-  
-  if (doc.containsKey("lux_min")) {
-    config.luxMinThreshold = doc["lux_min"];
-    changed = true;
-  }
-  if (doc.containsKey("lux_max")) {
-    config.luxMaxThreshold = doc["lux_max"];
-    changed = true;
-  }
-  if (doc.containsKey("interval")) {
-    config.sendInterval = doc["interval"];
-    changed = true;
-  }
-  if (doc.containsKey("auto_control")) {
-    config.autoControlEnabled = doc["auto_control"];
-    changed = true;
-  }
-  
-  if (changed) {
-    Serial.println("    Nueva configuración:");
-    Serial.println("    Umbral mín: " + String(config.luxMinThreshold) + " lux");
-    Serial.println("    Umbral máx: " + String(config.luxMaxThreshold) + " lux");
-    Serial.println("    Intervalo: " + String(config.sendInterval / 1000) + " seg");
-    Serial.println("    Auto control: " + String(config.autoControlEnabled ? "ON" : "OFF"));
-  }
 }
 
 void sendAck(String msgType) {
@@ -319,90 +215,113 @@ void sendAck(String msgType) {
   String jsonString;
   serializeJson(doc, jsonString);
   
-  Serial.println("→ Enviando ACK para: " + msgType);
+  Serial.println("Enviando ACK para: " + msgType);
   
   LoRa.beginPacket();
   LoRa.print(jsonString);
   LoRa.endPacket();
   
-  Serial.println("  ✓ ACK enviado");
+  Serial.println("  ACK enviado");
 }
 
-// ====== LÓGICA DE AUTOMATIZACIÓN ======
-
-void checkAutomationRules(float lux) {
-  static unsigned long lastActionTime = 0;
-  const unsigned long actionCooldown = 60000;  // 1 minuto entre acciones
+void sendLoRaPacket(String jsonString) {
+  transmitting = true;
+  txDoneFlag = false;
   
-  if (millis() - lastActionTime < actionCooldown) {
+  LoRa.beginPacket();
+  LoRa.write(destination);
+  LoRa.write(localAddress);
+  LoRa.write((msgCount >> 8));
+  LoRa.write(msgCount & 0xFF);
+  LoRa.print(jsonString);
+  
+  if (LoRa.endPacket(true)) {
+    Serial.println("  Paquete enviado");
+    successfulTx++;
+  } else {
+    Serial.println("  Error al enviar");
+    failedTx++;
+    transmitting = false;
     return;
   }
   
-  // Regla 1: Poca luz → Abrir cortinas
-  if (lux < config.luxMinThreshold && lastCommand != "OPEN") {
-    Serial.println("\n LUZ BAJA DETECTADA (" + String(lux) + " lux)");
-    Serial.println("→ Acción automática: ABRIR CORTINAS");
+  // Esperar confirmacion TX
+  unsigned long txStart = millis();
+  while (!txDoneFlag && (millis() - txStart < 5000)) {
+    delay(10);
+  }
+  
+  transmitting = false;
+  LoRa.receive();
+  
+  Serial.println("  Estadisticas - Exitos: " + String(successfulTx) + " | Fallos: " + String(failedTx));
+}
+
+// ====== MANEJO DE COMANDOS Y CONFIGURACION ======
+
+void handleCommand(JsonDocument& doc) {
+  String action = doc["action"];
+  
+  Serial.println("\nComando recibido del maestro: " + action);
+  
+  if (action == "open_curtains") {
     openCurtains();
-    sendAutomationAlert("low_light", lux);
     lastCommand = "OPEN";
-    lastActionTime = millis();
-  }
-  
-  // Regla 2: Mucha luz → Cerrar cortinas
-  else if (lux > config.luxMaxThreshold && lastCommand != "CLOSE") {
-    Serial.println("\n LUZ ALTA DETECTADA (" + String(lux) + " lux)");
-    Serial.println("→ Acción automática: CERRAR CORTINAS");
+  } else if (action == "close_curtains") {
     closeCurtains();
-    sendAutomationAlert("high_light", lux);
     lastCommand = "CLOSE";
-    lastActionTime = millis();
+  } else if (action == "request_data") {
+    Serial.println("  Solicitando envio inmediato de datos");
+    float lux = light.readLight();
+    unsigned long als = light.readWhiteLight();
+    sendSensorData(lux, als, getLightState(lux));
+  } else {
+    Serial.println("  Accion desconocida: " + action);
   }
 }
 
-void sendAutomationAlert(String reason, float lux) {
-  StaticJsonDocument<256> doc;
-  doc["node_id"] = NODE_ID;
-  doc["msg_type"] = "alert";
-  doc["timestamp"] = millis() / 1000;
-  doc["reason"] = reason;
-  doc["lux"] = lux;
-  doc["action_taken"] = lastCommand;
+void handleConfig(JsonDocument& doc) {
+  Serial.println("\nActualizando configuracion...");
   
-  String jsonString;
-  serializeJson(doc, jsonString);
+  bool changed = false;
   
-  Serial.println("→ Enviando alerta: " + reason);
+  if (doc.containsKey("interval")) {
+    sendInterval = doc["interval"];
+    changed = true;
+    Serial.println("  Intervalo: " + String(sendInterval / 1000) + " seg");
+  }
   
-  LoRa.beginPacket();
-  LoRa.print(jsonString);
-  LoRa.endPacket();
-  
-  Serial.println("Alerta enviada");
+  if (changed) {
+    Serial.println("  Configuracion actualizada");
+  }
 }
 
-// ====== FUNCIONES DE ACTUACIÓN ======
+// ====== FUNCIONES DE ACTUACION ======
 
 void openCurtains() {
-  Serial.println("┌─────────────────────────┐");
-  Serial.println("│ >>> CORTINAS ABIERTAS <<<│");
-  Serial.println("└─────────────────────────┘");
-  // Aquí conectarías un relé, motor, servo, etc.
-  // digitalWrite(RELAY_PIN, HIGH);
+  Serial.println("\n+-------------------------+");
+  Serial.println("| ABRIENDO CORTINAS       |");
+  Serial.println("+-------------------------+");
+  lastCommand = "OPEN";
+
 }
 
 void closeCurtains() {
-  Serial.println("┌─────────────────────────┐");
-  Serial.println("│ >>> CORTINAS CERRADAS <<<│");
-  Serial.println("└─────────────────────────┘");
-  // digitalWrite(RELAY_PIN, LOW);
+  Serial.println("\n+-------------------------+");
+  Serial.println("| CERRANDO CORTINAS       |");
+  Serial.println("+-------------------------+");
+  lastCommand = "CLOSE";
+
 }
 
 // ====== FUNCIONES AUXILIARES ======
 
 String getLightState(float lux) {
-  if (lux < 50) return "Oscuro";
-  else if (lux < 200) return "Poca luz";
-  else if (lux < 500) return "Interior";
-  else if (lux < 1000) return "Brillante";
-  else return "Muy brillante";
+  if (lux < 200) {
+    return "Oscuro";
+  } else if (lux < 800) {
+    return "Medio";
+  } else {
+    return "Brillante";
+  }
 }
