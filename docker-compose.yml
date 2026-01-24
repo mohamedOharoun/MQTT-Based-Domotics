@@ -1,0 +1,16 @@
+version: '3.8'
+
+services:
+  mosquitto:
+    image: eclipse-mosquitto:latest
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - "1883:1883"     # MQTT TCP
+      - "9001:9001"     # MQTT over WebSockets (optional, but useful for browser tools)
+    volumes:
+      - ./mqtt-server/config:/mosquitto/config
+      - ./mqtt-server/data:/mosquitto/data
+      - ./mqtt-server/log:/mosquitto/log
+    environment:
+      - TZ=Atlantic/Canary
