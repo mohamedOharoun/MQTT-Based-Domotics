@@ -1,6 +1,12 @@
 {
 	"vsmqtt.brokerProfiles": [
 		{
+			"name": "docker-raspberry",
+			"host": "10.216.190.208",
+			"port": 1883,
+			"clientId": "vsmqtt_client_7c28"
+		},
+		{
 			"name": "docker-localhost",
 			"host": "localhost",
 			"port": 1883,
