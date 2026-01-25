@@ -2,7 +2,7 @@
 #include "globals.h"
 
 #define FRAME_PACKET_START_MARKER "comm:start$"
-#define FRAME_PACKET_END_MARKER "comm:start$"
+#define FRAME_PACKET_END_MARKER "$comm:end"
 
 void serialbridge_report_packet(const char *packetStr)
 {

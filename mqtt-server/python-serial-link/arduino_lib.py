@@ -47,6 +47,8 @@ def serial_to_mqtt_loop(mqtt_client: mqtt_lib.mqtt.Client) -> None:
                 time.sleep(0.02)
                 continue
             
+            print("DEBUG: Serial read line:", line)
+            
             # Check if this line contains the start marker
             if START_MARKER in line:
                 in_frame = True

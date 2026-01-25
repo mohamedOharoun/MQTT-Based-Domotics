@@ -1,460 +1,936 @@
+SkinnyDevi
+				skinnydevi
+						Online
+
+								SkinnyDevi
+
+ — 21 /
+		10 / 2025,
+		22 : 18 ahora es un pingüino de club penguin en vez del gato de anime de antes
+						Akai
+
+ — 21 / 10 /
+				2025,
+		22 : 25 Fursona erasure si me preguntan
+						Akai
+
+ — 21 / 10 /
+				2025,
+		22 : 25 Pensaba que era el de linux xd
+						SkinnyDevi
+
+ — 21 / 10 /
+				2025,
+		22 : 25 HAHAHAHAHAH
+						mandaron a la mierda a todos los furros
+								SkinnyDevi
+
+ — 21 / 10 /
+				2025,
+		22 : 25 oosea si
+						Akai
+
+ — 21 / 10 /
+				2025,
+		22 : 26 Aunque me gusta más el logo de la aplicación
+						SkinnyDevi
+
+ — 21 / 10 /
+				2025,
+		22 : 26 pero creo q esta hecho a partir del de club penguin
+						SkinnyDevi
+
+ — 21 / 10 /
+				2025,
+		22 : 26 el logo nuevo si mola
+						Akai
+
+ — 21 / 10 /
+				2025,
+		22 : 26(No por razones homofóbicas)
+						SkinnyDevi
+
+ — 21 / 10 /
+				2025,
+		22 : 26 Akai
+
+ — 23 / 10 / 2025, 00 : 15 No sé si has usado la MV de ASO en linux Pero por si te freezea usa xorg en la MV, y se arregla Al menos a mí Hiciste RC ? SkinnyDevi
+
+ — 23 / 10 / 2025, 00 : 34 Solo la uso en clase, no me ha dado problemas SkinnyDevi
+
+ — 23 / 10 / 2025, 00 : 34 xorg como ? No está ya con X11 ? Akai
+
+ — 23 / 10 / 2025, 00 : 34 Nooo SkinnyDevi
+
+ — 23 / 10 / 2025, 00 : 34 Yes me acordé Akai
+
+ — 23 / 10 / 2025, 00 : 34 Aunque se llame @base - x el paquete, es wayland xd SkinnyDevi
+
+ — 23 / 10 / 2025, 00 : 34 What Que raro Akai
+
+ — 23 / 10 / 2025, 00 : 35 Fedora Como al apache le llama httpd SkinnyDevi
+
+ — 23 / 10 / 2025, 00 : 35 Juraría que cuando instale fastfetxh en la mv me salía mutter con x11 El viernes lo reviso pero juraría q lo tenía así Akai
+
+ — 21 / 01 / 2026, 22 : 05 dale SkinnyDevi started a call that lasted a minute. — 21 / 01 / 2026, 22 : 06 Akai
+
+ — 21 / 01 / 2026, 22 : 06 Pues sí SkinnyDevi
+
+ — 21 / 01 / 2026, 22 : 06 xddd Akai
+
+ — 21 / 01 / 2026, 22 : 06 Voy a reiniciar SkinnyDevi
+
+ — 21 / 01 / 2026, 22 : 07 okey np Akai
+
+ — 21 / 01 / 2026, 22 : 07 Puto Cachy y puto discord sobre todo SkinnyDevi
+
+ — 21 / 01 / 2026, 22 : 07 vesktop me ha estado dando por culo en Arch cuando pongo la camara no carga para los otros, y cuando la quito se crashea lleva como 2 semanas asi horrible Akai
+
+ — 21 / 01 / 2026, 22 : 08 Vamos aprobar a ver SkinnyDevi started a call that lasted 40 minutes. — 21 / 01 / 2026, 22 : 08 Akai
+
+ — 21 / 01 / 2026, 22 : 12 https : // github.com/mohamedOharoun/IC-Practica3-Lora
+																		GitHub GitHub
+																		-
+																		mohamedOharoun / IC - Practica3 - Lora Contribute to mohamedOharoun / IC - Practica3 - Lora development by creating an account on GitHub.Contribute to mohamedOharoun / IC - Practica3 - Lora development by creating an account on GitHub.SkinnyDevi
+
+ — 21 / 01 / 2026,
+		22 : 20 < command > hola < value > 2 < / value > </ command> Akai
+
+ — 21 / 01 / 2026, 22 : 22 comm : start$id, key : value..., comm : end$id SkinnyDevi
+
+ — 21 / 01 / 2026, 22 : 25 import serial import paho.mqtt.client as mqtt
+
+#Configure these:
+																									 SERIAL_PORT = '/dev/ttyACM0' #On Windows : 'COM3'(check Device Manager),
+																									 Linux / Mac : '/dev/ttyACM0' or similar BAUD_RATE = 9600 MQTT_BROKER = 'localhost' MQTT_PORT = 1883 MQTT_TOPIC_PREFIX = '' #Optional prefix
+
+																									 ser = serial.Serial(SERIAL_PORT, BAUD_RATE, timeout = 1)
+
+																														 client = mqtt.Client() client.connect(MQTT_BROKER, MQTT_PORT, 60) client.loop_start()
+
+																																					print("Bridge started - forwarding serial to MQTT")
+
+																																							while True : if ser.in_waiting
+																																			> 0 : line = ser.readline().decode('utf-8').strip() if line :
+#Simple format : assume "topic payload"
+		parts = line.split(' ', 1) if len (parts) == 2 : topic,
+																									 payload = parts full_topic = MQTT_TOPIC_PREFIX + topic client.publish(full_topic, payload) print(f "Published: {full_topic} -> {payload}") else :
+#If no space, publish to a default topic
+		client.publish("arduino/default", line) print(f "Published default: {line}") SkinnyDevi
+
+ — 21 / 01 / 2026,
+																									 22 : 33 https : // grok.com/share/bGVnYWN5LWNvcHk_7e1644da-09f5-4881-95a8-52ed2f7e8a7f
+																																	 Arduino MKR WAN MQTT Publishing Guide
+																																	 |
+																																	 Shared Grok Conversation and if i also wanted to send some data from the mqtt python script to the arduino,
+																									 how would you do Arduino MKR WAN MQTT Publishing Guide | Shared Grok Conversation Akai
+
+ — 21 / 01 / 2026,
+																									 22 : 37 Topic : iluminación Topic : configuración SkinnyDevi
+
+ — 21 / 01 / 2026,
+																									 22 : 38 sensors / lightindex sensors / srf02 pending name params / ... status / master status / sensor SkinnyDevi
+
+ — 19 : 13
 /* ---------------------------------------------------------------------
  * Grado Ingeniería Informática. Cuarto curso. Internet de las Cosas, IC
  * Grupo 41
  * Autores:
  *      - Wail Ben El Hassane Boudhar
  *      - Mohamed O. Haroun Zarkik
- * NODO ESCLAVO - Modo Largo Alcance + Sensor Ultrasónico SRF02
+Expand
+message.txt
+17 KB
+Akai
+
+ — 19:16
+/* ---------------------------------------------------------------------
+ * Grado Ingeniería Informática. Cuarto curso. Internet de las Cosas, IC
+ * Grupo 41
+ * Autores:
+ *      - Wail Ben El Hassane Boudhar
+ *      - Mohamed O. Haroun Zarkik
+ *
+ * NODO MAESTRO
+ * Inicio con Máximo Alcance + Optimización Progresiva
+ * Payload BINARIO desde el esclavo
  * ---------------------------------------------------------------------
-*/
+ */
 
 #include <SPI.h>
 #include <LoRa.h>
 #include <Arduino_PMIC.h>
 #include <Wire.h>
-#include <ArduinoJson.h>
+#include <RTCZero.h>
 
+#include "globals.h"
+
+/* ===================== CONFIG ===================== */
+#define TX_LAPSE_MS 5000
+#define ADJUSTMENT_SAMPLES 5
+#define CONFIG_WAIT_TIME 4000
+
+/* ===================== MESSAGE TYPES ===================== */
 #define MSG_TYPE_DATA 0x01
 #define MSG_TYPE_ECHO 0x02
 #define MSG_TYPE_CONFIG 0x03
 #define MSG_TYPE_CONFIG_ACK 0x04
 #define MSG_TYPE_SENSOR 0x05
 
-// ========== CONFIGURACIÓN SRF02 ==========
-// Dirección I2C del sensor SRF02 (7-bit)
-// Datasheet usa 0xE2 (8-bit), Arduino Wire usa 0x71 (7-bit)
-const uint8_t SRF02_ADDR = 0x71;
-const uint8_t SRF02_CMD_REG = 0x00;
-const uint8_t SRF02_RESULT_REG = 0x02;
-const uint8_t SRF02_RANGING_CM = 0x51;  // Resultado en centímetros
-const uint16_t SRF02_MEASUREMENT_DELAY = 70;  // Tiempo máximo de medición (datasheet: 65ms)
+/* ===================== SENSOR PROTOCOL ===================== */
+#define SENSOR_ID_ULTRA_01 0x01
+#define SENSOR_TYPE_ULTRASONIC 0x01
 
-// ========== CONFIGURACIÓN LORA ==========
-const uint8_t localAddress = 0xBB;
-uint8_t destination = 0xAA;
+#define DIST_STATE_ERROR 0x00
+#define DIST_STATE_CLOSE 0x01
+#define DIST_STATE_MEDIUM 0x02
+#define DIST_STATE_FAR 0x03
+
+																											 /* ===================== ADDRESSES ===================== */
+																											 const uint8_t localAddress = 0xAA;
+uint8_t destination = 0xBB;
+
+/* ===================== LORA STATE ===================== */
+volatile bool txDoneFlag = true;
+volatile bool transmitting = false;
+
+/* ===================== QUALITY THRESHOLDS ===================== */
+#define RSSI_EXCELLENT -50
+#define RSSI_GOOD -70
+#define RSSI_FAIR -90
+#define RSSI_POOR -110
+
+#define SNR_EXCELLENT 12.0
+#define SNR_GOOD 8.0
+#define SNR_FAIR 3.0
+#define SNR_POOR -3.0
+
+/* ===================== DYNAMIC PARAMETERS ===================== */
+uint8_t currentSF = 12;
+const uint8_t minSF = 7;
+const uint8_t maxSF = 12;
+
+uint8_t currentBW = 7;
+const uint8_t minBW = 6;
+const uint8_t maxBW = 9;
+
+uint8_t currentCR = 8;
+const uint8_t minCR = 5;
+const uint8_t maxCR = 8;
+
+uint8_t currentPower = 20;
+const uint8_t minPower = 2;
+const uint8_t maxPower = 20;
+
+/* Pending configuration */
+uint8_t pendingSF, pendingBW, pendingCR, pendingPower;
+bool configPending = false;
+uint32_t configSentTime = 0;
+
+double bandwidth_kHz[10] = {
+		7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
+		41.7E3, 62.5E3, 125E3, 250E3, 500E3};
+
+/* ===================== METRICS ===================== */
+struct SignalMetrics
+{
+	int rssi_sum;
+	float snr_sum;
+	uint8_t samples;
+} slaveMetrics = {0, 0.0, 0};
+
+uint32_t txStartTime = 0;
+uint32_t lastSuccessfulRx = 0;
+uint16_t successfulPackets = 0;
+uint8_t consecutiveFails = 0;
+bool linkEstablished = false;
+...(164 lines left)
+		Collapse
+		master.ino
+		8 KB
+		void onReceive(int size)
+{
+	Serial.println("onReceive triggered, size: " + String(size));
+
+	if (size == 0)
+		return;
+
+	uint8_t recipient = LoRa.read();
+	uint8_t sender = LoRa.read();
+	uint16_t msgId = (LoRa.read() << 8) | LoRa.read();
+	uint8_t length = LoRa.read();
+
+	Serial.println("Recipient: " + String(recipient) + " Sender: " + String(sender) + " MsgID: " + String(msgId) + " Length: " + String(length));
+
+	Serial.print("Payload bytes: ");
+	for (uint8_t i = 0; i < length && LoRa.available(); i++)
+	{
+		uint8_t b = LoRa.read();
+		Serial.print(b);
+		Serial.print(" ");
+	}
+	Serial.println("\n-------------------------");
+}
+void TxFinished()
+{
+	txDoneFlag = true;
+	Serial.println("TX done");
+	LoRa.receive(); // re-enable receive mode immediately
+}
+Akai
+
+ — 19 : 25
+/* ---------------------------------------------------------------------
+ * Grado Ingeniería Informática. Cuarto curso. Internet de las Cosas, IC
+ * Grupo 41
+ * Autores:
+ *      - Wail Ben El Hassane Boudhar
+ *      - Mohamed O. Haroun Zarkik
+ * NODO MAESTRO - Inicio con Máximo Alcance, Optimización Progresiva
+ * ---------------------------------------------------------------------
+ */
+
+#include <SPI.h>
+#include <LoRa.h>
+#include <Arduino_PMIC.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+		Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// ------------ CONFIGURACIÓN -------------
+#define TX_LAPSE_MS 5000
+#define OLED_DISPLAY_TIME 2000
+#define ADJUSTMENT_SAMPLES 5 // Más muestras para estabilidad
+#define CONFIG_WAIT_TIME 4000
+
+#define MSG_TYPE_DATA 0x01
+#define MSG_TYPE_ECHO 0x02
+#define MSG_TYPE_CONFIG 0x03
+#define MSG_TYPE_CONFIG_ACK 0x04
+
+const uint8_t localAddress = 0xAA;
+uint8_t destination = 0xBB;
 
 volatile bool txDoneFlag = true;
 volatile bool transmitting = false;
 
-// ------------ PARÁMETROS DINÁMICOS LORA -----------
-uint8_t currentSF = 12;
-uint8_t currentBW = 7;
-uint8_t currentCR = 8;
-uint8_t currentPower = 20;
+// ------------ UMBRALES DE CALIDAD (Más conservadores) -------------
+#define RSSI_EXCELLENT -50 // Solo optimizar con señal muy fuerte
+#define RSSI_GOOD -70
+#define RSSI_FAIR -90
+#define RSSI_POOR -110
 
-uint8_t newSF = 0;
-uint8_t newBW = 0;
-uint8_t newCR = 0;
-uint8_t newPower = 0;
-bool configReceived = false;
+#define SNR_EXCELLENT 12.0
+#define SNR_GOOD 8.0
+#define SNR_FAIR 3.0
+#define SNR_POOR -3.0
+
+// ------------ PARÁMETROS DINÁMICOS -------------
+// INICIAR CON CONFIGURACIÓN DE MÁXIMO ALCANCE
+uint8_t currentSF = 12; // SF máximo para largo alcance
+const uint8_t minSF = 7;
+const uint8_t maxSF = 12;
+
+uint8_t currentBW = 7;	 // 125kHz para mejor sensibilidad
+const uint8_t minBW = 6; // 62.5kHz
+const uint8_t maxBW = 9; // 500kHz
+
+uint8_t currentCR = 8; // CR 4/8 máxima corrección de errores
+const uint8_t minCR = 5;
+const uint8_t maxCR = 8;
+
+uint8_t currentPower = 20; // Potencia máxima
+const uint8_t minPower = 2;
+const uint8_t maxPower = 20;
+
+// Configuración pendiente
+uint8_t pendingSF = 0;
+uint8_t pendingBW = 0;
+uint8_t pendingCR = 0;
+uint8_t pendingPower = 0;
+bool configPending = false;
+uint32_t configSentTime = 0;
 
 double bandwidth_kHz[10] = {
-  7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
-  41.7E3, 62.5E3, 125E3, 250E3, 500E3
-};
+		7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
+		41.7E3, 62.5E3, 125E3, 250E3, 500E3};
 
-// ========== MÉTRICAS Y ESTADO ==========
-uint32_t lastRxTime = 0;
+// Métricas acumuladas
+struct SignalMetrics
+{
+	int rssi_sum;
+	float snr_sum;
+	uint8_t samples;
+} slaveMetrics = {0, 0.0, 0};
+
 uint32_t txStartTime = 0;
-uint32_t lastSensorReadTime = 0;
-uint16_t packetsReceived = 0;
-uint16_t echosSent = 0;
-uint16_t sensorReadings = 0;
+uint32_t lastSuccessfulRx = 0;
+uint16_t successfulPackets = 0;
+uint16_t failedPackets = 0;
+uint8_t consecutiveFails = 0;
+bool linkEstablished = false;
 
-String lastReceivedMsg = "";
-int lastRSSI = 0;
-float lastSNR = 0;
-
-// Datos del sensor
-float lastDistance = 0.0;
-String lastDistanceState = "Lejos";
-
-// Sensor reading interval (ms)
-const uint16_t SENSOR_READ_INTERVAL = 5000;
-
-enum SlaveState {
-  STATE_NORMAL,
-  STATE_SENDING_ACK,
-  STATE_APPLYING_CONFIG,
-  STATE_READING_SENSOR,
-  STATE_SENDING_SENSOR_DATA
+enum State
+{
+	STATE_NORMAL,
+	STATE_SENDING_CONFIG,
+	STATE_WAITING_CONFIG_ACK
 };
-SlaveState currentState = STATE_NORMAL;
+State currentState = STATE_NORMAL;
+...(390 lines left)
+		Collapse
+		master.ino
+		15 KB
+﻿ Akai
+		akai_malek
 
-// ========== FUNCIONES SENSOR SRF02 ==========
-
-/**
- * Detecta si el sensor está disponible en la dirección I2C
+/* ---------------------------------------------------------------------
+ * Grado Ingeniería Informática. Cuarto curso. Internet de las Cosas, IC
+ * Grupo 41
+ * Autores:
+ *      - Wail Ben El Hassane Boudhar
+ *      - Mohamed O. Haroun Zarkik
+ * NODO MAESTRO - Inicio con Máximo Alcance, Optimización Progresiva
+ * ---------------------------------------------------------------------
  */
-bool sensorDetect() {
-  Wire.beginTransmission(SRF02_ADDR);
-  byte error = Wire.endTransmission();
-  return (error == 0);
+
+#include <SPI.h>
+#include <LoRa.h>
+#include <Arduino_PMIC.h>
+#include <Wire.h>
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
+
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+		Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
+// ------------ CONFIGURACIÓN -------------
+#define TX_LAPSE_MS 5000
+#define OLED_DISPLAY_TIME 2000
+#define ADJUSTMENT_SAMPLES 5 // Más muestras para estabilidad
+#define CONFIG_WAIT_TIME 4000
+
+#define MSG_TYPE_DATA 0x01
+#define MSG_TYPE_ECHO 0x02
+#define MSG_TYPE_CONFIG 0x03
+#define MSG_TYPE_CONFIG_ACK 0x04
+
+const uint8_t localAddress = 0xAA;
+uint8_t destination = 0xBB;
+
+volatile bool txDoneFlag = true;
+volatile bool transmitting = false;
+
+// ------------ UMBRALES DE CALIDAD (Más conservadores) -------------
+#define RSSI_EXCELLENT -50 // Solo optimizar con señal muy fuerte
+#define RSSI_GOOD -70
+#define RSSI_FAIR -90
+#define RSSI_POOR -110
+
+#define SNR_EXCELLENT 12.0
+#define SNR_GOOD 8.0
+#define SNR_FAIR 3.0
+#define SNR_POOR -3.0
+
+// ------------ PARÁMETROS DINÁMICOS -------------
+// INICIAR CON CONFIGURACIÓN DE MÁXIMO ALCANCE
+uint8_t currentSF = 12; // SF máximo para largo alcance
+const uint8_t minSF = 7;
+const uint8_t maxSF = 12;
+
+uint8_t currentBW = 7;	 // 125kHz para mejor sensibilidad
+const uint8_t minBW = 6; // 62.5kHz
+const uint8_t maxBW = 9; // 500kHz
+
+uint8_t currentCR = 8; // CR 4/8 máxima corrección de errores
+const uint8_t minCR = 5;
+const uint8_t maxCR = 8;
+
+uint8_t currentPower = 20; // Potencia máxima
+const uint8_t minPower = 2;
+const uint8_t maxPower = 20;
+
+// Configuración pendiente
+uint8_t pendingSF = 0;
+uint8_t pendingBW = 0;
+uint8_t pendingCR = 0;
+uint8_t pendingPower = 0;
+bool configPending = false;
+uint32_t configSentTime = 0;
+
+double bandwidth_kHz[10] = {
+		7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
+		41.7E3, 62.5E3, 125E3, 250E3, 500E3};
+
+// Métricas acumuladas
+struct SignalMetrics
+{
+	int rssi_sum;
+	float snr_sum;
+	uint8_t samples;
+} slaveMetrics = {0, 0.0, 0};
+
+uint32_t txStartTime = 0;
+uint32_t lastSuccessfulRx = 0;
+uint16_t successfulPackets = 0;
+uint16_t failedPackets = 0;
+uint8_t consecutiveFails = 0;
+bool linkEstablished = false;
+
+enum State
+{
+	STATE_NORMAL,
+	STATE_SENDING_CONFIG,
+	STATE_WAITING_CONFIG_ACK
+};
+State currentState = STATE_NORMAL;
+
+// ------------ OLED -------------
+void oledMsg(const String &line1, const String &line2 = "", const String &line3 = "", const String &line4 = "")
+{
+	display.clearDisplay();
+	display.setTextSize(1);
+	display.setTextColor(SSD1306_WHITE);
+	display.setCursor(0, 0);
+	display.println(line1);
+	if (line2 != "")
+		display.println(line2);
+	if (line3 != "")
+		display.println(line3);
+	if (line4 != "")
+		display.println(line4);
+	display.display();
 }
 
-/**
- * Lee la distancia del sensor SRF02
- * Retorna la distancia en cm, o -1 si hay error
- */
-float readSRF02Distance() {
-  // 1. Enviar comando de medición
-  Wire.beginTransmission(SRF02_ADDR);
-  Wire.write(SRF02_CMD_REG);
-  Wire.write(SRF02_RANGING_CM);
-  byte error = Wire.endTransmission();
+// ------------ APLICAR CONFIGURACIÓN -------------
+void applyConfiguration()
+{
+	LoRa.idle();
+	delay(50);
 
-  if (error != 0) {
-    Serial.println("  ✗ SRF02: Error enviando comando");
-    return -1.0;
-  }
+	LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));
+	LoRa.setSpreadingFactor(currentSF);
+	LoRa.setCodingRate4(currentCR);
+	LoRa.setTxPower(currentPower, PA_OUTPUT_PA_BOOST_PIN);
+	LoRa.setPreambleLength(currentSF >= 11 ? 16 : (currentSF >= 9 ? 12 : 8));
+	LoRa.enableCrc();
+	LoRa.setSyncWord(0x12);
 
-  // 2. Esperar a que termine la medición
-  delay(SRF02_MEASUREMENT_DELAY);
+	delay(50);
+	LoRa.receive();
 
-  // 3. Leer el resultado (2 bytes: High y Low)
-  Wire.beginTransmission(SRF02_ADDR);
-  Wire.write(SRF02_RESULT_REG);
-  Wire.endTransmission();
+	Serial.println("╔════════════════════════════════════════╗");
+	Serial.println("║   CONFIGURACIÓN APLICADA               ║");
+	Serial.println("╚════════════════════════════════════════╝");
+	Serial.println("  SF: " + String(currentSF));
+	Serial.println("  BW: " + String(bandwidth_kHz[currentBW] / 1000.0) + " kHz");
+	Serial.println("  CR: 4/" + String(currentCR));
+	Serial.println("  Power: " + String(currentPower) + " dBm");
 
-  Wire.requestFrom(SRF02_ADDR, (uint8_t)2);
+	// Cálculo aproximado de alcance
+	float rangeKm = 0.5;
+	if (currentSF >= 12 && currentPower >= 17)
+		rangeKm = 15.0;
+	else if (currentSF >= 11)
+		rangeKm = 8.0;
+	else if (currentSF >= 10)
+		rangeKm = 4.0;
+	else if (currentSF >= 9)
+		rangeKm = 2.0;
+	else if (currentSF >= 8)
+		rangeKm = 1.0;
 
-  if (Wire.available() < 2) {
-    Serial.println("  ✗ SRF02: No hay datos disponibles");
-    return -1.0;
-  }
+	Serial.println("  Alcance estimado: ~" + String(rangeKm) + " km");
+	Serial.println("========================================\n");
 
-  byte highByte = Wire.read();
-  byte lowByte = Wire.read();
-
-  // Combinar bytes
-  int distanceCm = (highByte << 8) | lowByte;
-
-  return (float)distanceCm;
+	oledMsg("Config Aplicada",
+					"SF:" + String(currentSF) + " CR:4/" + String(currentCR),
+					"BW:" + String(bandwidth_kHz[currentBW] / 1000.0) + "k P:" + String(currentPower),
+					"~" + String(rangeKm) + "km alcance");
+	delay(OLED_DISPLAY_TIME);
 }
 
-/**
- * Determina el estado de distancia basado en el valor
- */
-String getDistanceState(float distance) {
-  if (distance < 0) return "Error";
-  if (distance < 30) return "Cerca";
-  if (distance < 100) return "Medio";
-  return "Lejos";
+// ------------ ENVIAR CONFIGURACIÓN AL ESCLAVO -------------
+void sendConfigToSlave(uint8_t sf, uint8_t bw, uint8_t cr, uint8_t pwr)
+{
+	Serial.println("→ Enviando nueva configuración al esclavo...");
+	Serial.println("  SF:" + String(sf) + " BW:" + String(bandwidth_kHz[bw] / 1000.0) +
+								 "kHz CR:4/" + String(cr) + " Pwr:" + String(pwr) + "dBm");
+
+	uint8_t payload[5];
+	payload[0] = MSG_TYPE_CONFIG;
+	payload[1] = sf;
+	payload[2] = bw;
+	payload[3] = cr;
+	payload[4] = pwr;
+
+	transmitting = true;
+	txDoneFlag = false;
+
+	sendMessage(payload, 5, 0xFFFF);
+
+	pendingSF = sf;
+	pendingBW = bw;
+	pendingCR = cr;
+	pendingPower = pwr;
+	configPending = true;
+	configSentTime = millis();
+	currentState = STATE_WAITING_CONFIG_ACK;
+
+	oledMsg("Enviando Config", "SF:" + String(sf) + " Pwr:" + String(pwr), "Esperando ACK...");
 }
 
-/**
- * Envía datos del sensor al maestro en formato JSON
- */
-void sendSensorData() {
-  if (transmitting) {
-    Serial.println("  ⚠ Transmisión en progreso, saltando envío de sensor");
-    return;
-  }
-
-  StaticJsonDocument<256> doc;
-  doc["node_id"] = "ULTRA_01";
-  doc["msg_type"] = "sensor_data";
-  doc["timestamp"] = millis() / 1000;
-  doc["msg_id"] = sensorReadings;
-  doc["sensor_type"] = "ultrasonic";
-
-  JsonObject data = doc.createNestedObject("data");
-  data["distance_cm"] = lastDistance;
-  data["estado"] = lastDistanceState;
-
-  String jsonString;
-  serializeJson(doc, jsonString);
-
-  // Convertir JSON a buffer para transmisión
-  uint8_t payload[200];
-  uint8_t len = 0;
-
-  payload[len++] = MSG_TYPE_SENSOR;
-
-  // Copiar JSON al payload
-  for (int i = 0; i < jsonString.length() && len < 199; i++) {
-    payload[len++] = jsonString.charAt(i);
-  }
-
-  transmitting = true;
-  txDoneFlag = false;
-  txStartTime = millis();
-
-  Serial.println("→ Enviando datos de sensor #" + String(sensorReadings));
-  Serial.println("  JSON: " + jsonString);
-
-  sendMessage(payload, len, sensorReadings);
-
-  sensorReadings++;
+// ------------ EVALUAR CALIDAD -------------
+String evaluateSignalQuality(int rssi, float snr)
+{
+	if (rssi > RSSI_EXCELLENT && snr > SNR_EXCELLENT)
+		return "EXCELENTE";
+	if (rssi > RSSI_GOOD && snr > SNR_GOOD)
+		return "BUENA";
+	if (rssi > RSSI_FAIR && snr > SNR_FAIR)
+		return "ACEPTABLE";
+	if (rssi > RSSI_POOR && snr > SNR_POOR)
+		return "POBRE";
+	return "MUY POBRE";
 }
 
-// ========== FUNCIONES LORA ==========
+// ------------ AJUSTE DINÁMICO (Conservador) -------------
+void adjustConfiguration(int avgRSSI, float avgSNR)
+{
+	uint8_t newSF = currentSF;
+	uint8_t newBW = currentBW;
+	uint8_t newCR = currentCR;
+	uint8_t newPower = currentPower;
+	bool changed = false;
+	String action = "";
 
-void applyConfiguration() {
-  LoRa.idle();
-  delay(50);
+	Serial.println("╔════════════════════════════════════════╗");
+	Serial.println("║   ANÁLISIS DE CALIDAD DE SEÑAL         ║");
+	Serial.println("╚════════════════════════════════════════╝");
+	Serial.println("RSSI promedio: " + String(avgRSSI) + " dBm");
+	Serial.println("SNR promedio: " + String(avgSNR) + " dB");
+	Serial.println("Calidad: " + evaluateSignalQuality(avgRSSI, avgSNR));
+	Serial.println("Enlace establecido: " + String(linkEstablished ? "SÍ" : "NO"));
+	Serial.println("----------------------------------------");
 
-  LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));
-  LoRa.setSpreadingFactor(currentSF);
-  LoRa.setCodingRate4(currentCR);
-  LoRa.setTxPower(currentPower, PA_OUTPUT_PA_BOOST_PIN);
-  LoRa.setPreambleLength(currentSF >= 11 ? 16 : (currentSF >= 9 ? 12 : 8));
-  LoRa.enableCrc();
-  LoRa.setSyncWord(0x12);
+	// Solo optimizar si el enlace está muy estable
+	if (avgRSSI > RSSI_EXCELLENT && avgSNR > SNR_EXCELLENT && linkEstablished)
+	{
+		Serial.println("→ Señal excelente y enlace estable. Optimización LEVE:");
 
-  delay(50);
-  LoRa.receive();
+		// Solo reducir potencia levemente
+		if (newPower > minPower + 5)
+		{
+			newPower -= 2;
+			action += "Power↓ ";
+			changed = true;
+		}
+	}
 
-  Serial.println("╔════════════════════════════════════════╗");
-  Serial.println("║   CONFIGURACIÓN SINCRONIZADA          ║");
-  Serial.println("╚════════════════════════════════════════╝");
-  Serial.println("  SF: " + String(currentSF));
-  Serial.println("  BW: " + String(bandwidth_kHz[currentBW]/1000.0) + " kHz");
-  Serial.println("  CR: 4/" + String(currentCR));
-  Serial.println("  Power: " + String(currentPower) + " dBm");
+	else if (avgRSSI > RSSI_GOOD && avgSNR > SNR_GOOD)
+	{
+		Serial.println("→ Señal buena. MANTENIENDO configuración.");
+		action = "Sin cambios (óptimo)";
+	}
 
-  float rangeKm = 0.5;
-  if(currentSF >= 12 && currentPower >= 17) rangeKm = 15.0;
-  else if(currentSF >= 11) rangeKm = 8.0;
-  else if(currentSF >= 10) rangeKm = 4.0;
-  else if(currentSF >= 9) rangeKm = 2.0;
-  else if(currentSF >= 8) rangeKm = 1.0;
+	else if (avgRSSI > RSSI_FAIR && avgSNR > SNR_FAIR)
+	{
+		Serial.println("→ Señal aceptable. MANTENIENDO configuración.");
+		action = "Sin cambios";
+	}
 
-  Serial.println("  Alcance estimado: ~" + String(rangeKm) + " km");
-  Serial.println("========================================\n");
+	else if (avgRSSI > RSSI_POOR && avgSNR > SNR_POOR)
+	{
+		Serial.println("→ Señal pobre. MEJORANDO:");
+
+		if (newPower < maxPower - 2)
+		{
+			newPower += 3;
+			action += "Power↑ ";
+			changed = true;
+		}
+		if (newSF < maxSF)
+		{
+			newSF++;
+			action += "SF↑ ";
+			changed = true;
+		}
+		if (newCR < maxCR)
+		{
+			newCR++;
+			action += "CR↑ ";
+			changed = true;
+		}
+	}
+
+	else
+	{
+		Serial.println("→ Señal muy pobre. MEJORA MÁXIMA:");
+
+		newPower = maxPower;
+		newSF = maxSF;
+		newBW = 7; // 125kHz
+		newCR = maxCR;
+		action = "Config MÁXIMA";
+		changed = true;
+	}
+
+	Serial.println("Acciones: " + action);
+	Serial.println("========================================\n");
+
+	if (changed)
+	{
+		sendConfigToSlave(newSF, newBW, newCR, newPower);
+	}
 }
 
-void sendConfigAck() {
-  Serial.println("→ Enviando ACK de configuración...");
+// ------------ SETUP -------------
+void setup()
+{
+	Serial.begin(115200);
+	while (!Serial)
+		;
 
-  uint8_t payload[1];
-  payload[0] = MSG_TYPE_CONFIG_ACK;
+	if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3D))
+	{
+		Serial.println("Error OLED");
+		while (1)
+			;
+	}
+	oledMsg("Inicializando...", "Modo Largo Alcance");
+	delay(1500);
 
-  transmitting = true;
-  txDoneFlag = false;
+	if (!LoRa.begin(868E6))
+	{
+		Serial.println("Error LoRa");
+		oledMsg("Error LoRa!");
+		while (1)
+			;
+	}
 
-  sendMessage(payload, 1, 0xFFFE);
+	// Se empieza con MÁXIMO ALCANCE
+	applyConfiguration();
 
-  currentState = STATE_APPLYING_CONFIG;
+	LoRa.onReceive(onReceive);
+	LoRa.onTxDone(TxFinished);
+	LoRa.receive();
+
+	oledMsg("Maestro Activo", "LARGO ALCANCE", "SF:12 BW:125k", "Pwr:20dBm ~15km");
+	Serial.println("╔════════════════════════════════════════╗");
+	Serial.println("║   MAESTRO - Modo Largo Alcance        ║");
+	Serial.println("╚════════════════════════════════════════╝");
+	Serial.println("Iniciado con configuración máxima");
+	Serial.println("SF:12 BW:125kHz CR:4/8 Power:20dBm");
+	Serial.println("Alcance: hasta 15km línea de vista\n");
+	delay(OLED_DISPLAY_TIME);
 }
 
-String evaluateSignalQuality(int rssi, float snr) {
-  if(rssi > -50 && snr > 12) return "EXCELENTE";
-  if(rssi > -70 && snr > 8) return "BUENA";
-  if(rssi > -90 && snr > 3) return "ACEPTABLE";
-  if(rssi > -110 && snr > -3) return "POBRE";
-  return "MUY POBRE";
+// ------------ LOOP -------------
+void loop()
+{
+	static uint32_t lastSendTime_ms = 0;
+	static uint16_t msgCount = 0;
+
+	// Timeout de ACK de configuración
+	if (currentState == STATE_WAITING_CONFIG_ACK &&
+			(millis() - configSentTime) > CONFIG_WAIT_TIME)
+	{
+		Serial.println("Timeout ACK config. Aplicando...");
+		currentSF = pendingSF;
+		currentBW = pendingBW;
+		currentCR = pendingCR;
+		currentPower = pendingPower;
+		applyConfiguration();
+		currentState = STATE_NORMAL;
+		configPending = false;
+	}
+
+	// Timeout de comunicación
+	if (lastSuccessfulRx > 0 && (millis() - lastSuccessfulRx) > 30000)
+	{
+		consecutiveFails++;
+		Serial.println("SIN COMUNICACIÓN > 30s. Fallos: " + String(consecutiveFails));
+
+		if (consecutiveFails >= 2)
+		{
+			Serial.println("Restaurando configuración MÁXIMA...");
+			sendConfigToSlave(maxSF, 7, maxCR, maxPower);
+			consecutiveFails = 0;
+			linkEstablished = false;
+			lastSuccessfulRx = millis();
+		}
+	}
+
+	// Enviar datos solo en estado normal
+	if (currentState == STATE_NORMAL && !transmitting &&
+			((millis() - lastSendTime_ms) > TX_LAPSE_MS))
+	{
+
+		String debugMsg = "M" + String(msgCount);
+
+		uint8_t payload[50];
+		uint8_t payloadLength = 0;
+
+		payload[payloadLength++] = MSG_TYPE_DATA;
+
+		for (int i = 0; i < debugMsg.length() && payloadLength < 48; i++)
+		{
+			payload[payloadLength++] = debugMsg.charAt(i);
+		}
+
+		transmitting = true;
+		txDoneFlag = false;
+		txStartTime = millis();
+
+		sendMessage(payload, payloadLength, msgCount);
+
+		oledMsg("TX #" + String(msgCount),
+						debugMsg,
+						"SF:" + String(currentSF) + " P:" + String(currentPower),
+						linkEstablished ? "ENLACE OK" : "Buscando...");
+
+		Serial.println("→ TX #" + String(msgCount) + " | " + debugMsg +
+									 " | SF:" + String(currentSF) + " P:" + String(currentPower) + "dBm");
+
+		msgCount++;
+		lastSendTime_ms = millis();
+	}
+
+	if (transmitting && txDoneFlag)
+	{
+		transmitting = false;
+		LoRa.receive();
+	}
 }
 
-void setup() {
-  Serial.begin(115200);
-  while(!Serial);
+// ------------ ENVÍO -------------
+void sendMessage(uint8_t *payload, uint8_t length, uint16_t id)
+{
+	while (!LoRa.beginPacket())
+		delay(5);
 
-  // ========== INICIALIZAR I2C ==========
-  Serial.println("\nInicializando I2C...");
-  Wire.begin();
-  delay(100);
+	LoRa.write(destination);
+	LoRa.write(localAddress);
+	LoRa.write((uint8_t)(id >> 8));
+	LoRa.write((uint8_t)(id & 0xFF));
+	LoRa.write(length);
+	LoRa.write(payload, length);
 
-  // Detectar sensor
-  Serial.print("Detectando SRF02 en 0x71... ");
-  if (sensorDetect()) {
-    Serial.println("✓ Sensor detectado");
-  } else {
-    Serial.println("✗ Error: Sensor no detectado");
-    Serial.println("Revisa conexiones SDA/SCL y alimentación");
-    // Continuar de todos modos para no bloquear LoRa
-  }
-
-  // ========== INICIALIZAR LORA ==========
-  Serial.println("\nInicializando LoRa...");
-  if (!LoRa.begin(868E6)) {
-    Serial.println("Error LoRa");
-    while(1);
-  }
-
-  applyConfiguration();
-
-  LoRa.onReceive(onReceive);
-  LoRa.onTxDone(TxFinished);
-  LoRa.receive();
-
-  Serial.println("╔════════════════════════════════════════╗");
-  Serial.println("║   ESCLAVO + SENSOR ULTRASÓNICO        ║");
-  Serial.println("╚════════════════════════════════════════╝");
-  Serial.println("LoRa: SF:12 BW:125kHz CR:4/8 Power:20dBm");
-  Serial.println("SRF02: Adquiriendo lecturas cada 5s");
-  Serial.println("Esperando comandos del maestro...\n");
-
-  lastSensorReadTime = millis();
+	LoRa.endPacket(true);
 }
 
-void loop() {
-  // Aplicar configuración pendiente
-  if(currentState == STATE_APPLYING_CONFIG && !transmitting) {
-    delay(500);
+// ------------ RECEIVE -------------
+void onReceive(int size)
+{
+	if (transmitting && !txDoneFlag)
+		txDoneFlag = true;
+	if (size == 0)
+		return;
 
-    Serial.println("→ Aplicando nueva configuración...");
-    currentSF = newSF;
-    currentBW = newBW;
-    currentCR = newCR;
-    currentPower = newPower;
-    applyConfiguration();
+	uint32_t rxTime = millis();
 
-    currentState = STATE_NORMAL;
-    configReceived = false;
-  }
+	uint8_t recipient = LoRa.read();
+	uint8_t sender = LoRa.read();
+	uint16_t msgId = (LoRa.read() << 8) | LoRa.read();
+	uint8_t length = LoRa.read();
 
-  // Lectura periódica del sensor
-  if (currentState == STATE_NORMAL && !transmitting && 
-      (millis() - lastSensorReadTime) >= SENSOR_READ_INTERVAL) {
-    
-    currentState = STATE_READING_SENSOR;
-    lastSensorReadTime = millis();
-    
-    Serial.println("\n======== LECTURA SENSOR SRF02 ========");
-    lastDistance = readSRF02Distance();
-    lastDistanceState = getDistanceState(lastDistance);
-    
-    if (lastDistance >= 0) {
-      Serial.println("✓ Distancia: " + String(lastDistance) + " cm");
-      Serial.println("  Estado: " + lastDistanceState);
-    } else {
-      Serial.println("✗ Error en la lectura del sensor");
-    }
-    Serial.println("=====================================");
-    
-    currentState = STATE_SENDING_SENSOR_DATA;
-  }
+	uint8_t buffer[50];
+	for (uint8_t i = 0; i < length && i < 50; i++)
+		buffer[i] = LoRa.read();
 
-  // Enviar datos del sensor
-  if (currentState == STATE_SENDING_SENSOR_DATA && !transmitting) {
-    sendSensorData();
-    currentState = STATE_NORMAL;
-  }
+	uint8_t msgType = buffer[0];
 
-  // Enviar eco si hay mensaje pendiente
-  if (currentState == STATE_NORMAL && !transmitting && lastReceivedMsg.length() > 0) {
-    uint8_t payload[50];
-    uint8_t len = 0;
+	// ACK de configuración
+	if (msgType == MSG_TYPE_CONFIG_ACK && currentState == STATE_WAITING_CONFIG_ACK)
+	{
+		Serial.println("✓ ACK Config recibido. Aplicando...");
 
-    payload[len++] = MSG_TYPE_ECHO;
-    payload[len++] = (uint8_t)lastRSSI;
-    payload[len++] = (uint8_t)lastSNR;
+		currentSF = pendingSF;
+		currentBW = pendingBW;
+		currentCR = pendingCR;
+		currentPower = pendingPower;
+		applyConfiguration();
 
-    for(int i = 0; i < lastReceivedMsg.length() && len < 48; i++) {
-      payload[len++] = lastReceivedMsg.charAt(i);
-    }
+		currentState = STATE_NORMAL;
+		configPending = false;
+		consecutiveFails = 0;
+		lastSuccessfulRx = rxTime;
 
-    transmitting = true;
-    txDoneFlag = false;
-    txStartTime = millis();
+		return;
+	}
 
-    sendMessage(payload, len, echosSent);
+	// Eco con métricas
+	if (msgType == MSG_TYPE_ECHO)
+	{
+		uint32_t roundTripTime = rxTime - txStartTime;
 
-    Serial.println("→ ECO #" + String(echosSent) + " | " + lastReceivedMsg +
-                   " | RSSI:" + String(lastRSSI) + " SNR:" + String(lastSNR));
+		int8_t slaveRSSI = (int8_t)buffer[1];
+		int8_t slaveSNR = (int8_t)buffer[2];
 
-    echosSent++;
-    lastReceivedMsg = "";
-  }
+		String echoMsg = "";
+		if (length > 3)
+		{
+			for (uint8_t i = 3; i < length; i++)
+			{
+				echoMsg += (char)buffer[i];
+			}
+		}
 
-  if (transmitting && txDoneFlag) {
-    uint32_t txDuration = millis() - txStartTime;
-    Serial.println("  ✓ Enviado en " + String(txDuration) + " ms\n");
-    transmitting = false;
-    LoRa.receive();
-  }
+		int localRSSI = LoRa.packetRssi();
+		float localSNR = LoRa.packetSnr();
+
+		slaveMetrics.rssi_sum += slaveRSSI;
+		slaveMetrics.snr_sum += slaveSNR;
+		slaveMetrics.samples++;
+
+		consecutiveFails = 0;
+		lastSuccessfulRx = rxTime;
+		successfulPackets++;
+
+		// Marcar enlace como establecido tras primer eco exitoso
+		if (!linkEstablished)
+		{
+			linkEstablished = true;
+			Serial.println("★★★ ENLACE ESTABLECIDO ★★★");
+		}
+
+		oledMsg("✓ ECO #" + String(msgId),
+						echoMsg,
+						"RSSI:" + String(slaveRSSI) + " SNR:" + String(slaveSNR),
+						"RTT:" + String(roundTripTime) + "ms");
+
+		Serial.println("✓ ECO | " + echoMsg + " | Esclavo RSSI:" + String(slaveRSSI) +
+									 " SNR:" + String(slaveSNR) + " | RTT:" + String(roundTripTime) +
+									 "ms | " + evaluateSignalQuality(slaveRSSI, slaveSNR));
+		Serial.println("  Local RSSI:" + String(localRSSI) + " SNR:" + String(localSNR));
+
+		if (slaveMetrics.samples >= ADJUSTMENT_SAMPLES)
+		{
+			int avgRSSI = slaveMetrics.rssi_sum / slaveMetrics.samples;
+			float avgSNR = slaveMetrics.snr_sum / slaveMetrics.samples;
+
+			Serial.println("  → " + String(slaveMetrics.samples) + " muestras acumuladas. Evaluando...");
+			adjustConfiguration(avgRSSI, avgSNR);
+
+			slaveMetrics.rssi_sum = 0;
+			slaveMetrics.snr_sum = 0;
+			slaveMetrics.samples = 0;
+		}
+		else
+		{
+			Serial.println("  Muestra " + String(slaveMetrics.samples) + "/" + String(ADJUSTMENT_SAMPLES));
+		}
+
+		delay(1000);
+	}
 }
 
-void sendMessage(uint8_t* payload, uint8_t length, uint16_t id) {
-  while(!LoRa.beginPacket()) delay(5);
-
-  LoRa.write(destination);
-  LoRa.write(localAddress);
-  LoRa.write((uint8_t)(id >> 8));
-  LoRa.write((uint8_t)(id & 0xFF));
-  LoRa.write(length);
-  LoRa.write(payload, length);
-
-  LoRa.endPacket(true);
-}
-
-void onReceive(int size) {
-  if (transmitting && !txDoneFlag) txDoneFlag = true;
-  if (size==0) return;
-
-  uint32_t rxTime = millis();
-
-  uint8_t recipient = LoRa.read();
-  uint8_t sender = LoRa.read();
-  uint16_t msgId = (LoRa.read() << 8) | LoRa.read();
-  uint8_t length = LoRa.read();
-
-  uint8_t buffer[50];
-  for (uint8_t i=0; i<length && i<50; i++) buffer[i]=LoRa.read();
-
-  uint8_t msgType = buffer[0];
-
-  // Nueva configuración del maestro
-  if(msgType == MSG_TYPE_CONFIG) {
-    newSF = buffer[1];
-    newBW = buffer[2];
-    newCR = buffer[3];
-    newPower = buffer[4];
-
-    Serial.println("========================================");
-    Serial.println("✓ NUEVA CONFIGURACIÓN RECIBIDA");
-    Serial.println("  SF: " + String(newSF));
-    Serial.println("  BW: " + String(bandwidth_kHz[newBW]/1000.0) + " kHz");
-    Serial.println("  CR: 4/" + String(newCR));
-    Serial.println("  Power: " + String(newPower) + " dBm");
-    Serial.println("========================================");
-
-    configReceived = true;
-    sendConfigAck();
-
-    return;
-  }
-
-  // Datos normales del maestro
-  if(msgType == MSG_TYPE_DATA) {
-    String receivedMsg = "";
-    if(length > 1) {
-      for(uint8_t i=1; i<length; i++) {
-        receivedMsg += (char)buffer[i];
-      }
-    }
-
-    lastRSSI = LoRa.packetRssi();
-    lastSNR = LoRa.packetSnr();
-    long freqError = LoRa.packetFrequencyError();
-
-    lastReceivedMsg = receivedMsg;
-    packetsReceived++;
-    lastRxTime = rxTime;
-
-    String quality = evaluateSignalQuality(lastRSSI, lastSNR);
-
-    Serial.println("========================================");
-    Serial.println("✓ RX MAESTRO #" + String(msgId) + " | " + receivedMsg);
-    Serial.println("RSSI:" + String(lastRSSI) + "dBm SNR:" + String(lastSNR) +
-                   "dB FErr:" + String(freqError) + "Hz");
-    Serial.println("Calidad: " + quality);
-    Serial.println("RX:" + String(packetsReceived) + " Echo:" + String(echosSent));
-    Serial.println("========================================");
-
-    if(packetsReceived % 10 == 0) {
-      Serial.println("\n★ Estadísticas:");
-      Serial.println("  Total recibidos: " + String(packetsReceived));
-      Serial.println("  Total ecos: " + String(echosSent));
-      Serial.println("  Lecturas sensor: " + String(sensorReadings));
-      Serial.println("  Config: SF:" + String(currentSF) +
-                     " BW:" + String(bandwidth_kHz[currentBW]/1000.0) +
-                     "kHz P:" + String(currentPower) + "dBm\n");
-    }
-  }
-}
-
-void TxFinished() {
-  txDoneFlag = true;
+void TxFinished()
+{
+	txDoneFlag = true;
 }
