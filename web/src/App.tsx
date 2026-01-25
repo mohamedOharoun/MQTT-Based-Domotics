@@ -69,6 +69,11 @@ export function App() {
           <div className="w-12"></div>
         </div>
       </header>
+
+			<div className="flex justify-center items-center my-6 text-center text-sm text-gray-500">
+        <p>WebSocket connection to localhost:9001. Messages are limited to the last 100 entries</p>
+      </div>
+			
 			<MonitorView mqttClient={client} connectionStatus={connectionStatus} />
 
 			{error && (
@@ -76,10 +81,6 @@ export function App() {
           <strong>Error:</strong> {error}
         </div>
       )}
-
-      <div className="flex justify-center items-center my-6 text-center text-sm text-gray-500">
-        <p>WebSocket connection to localhost:9001. Messages are limited to the last 100 entries</p>
-      </div>
 	</div>);
 }
 

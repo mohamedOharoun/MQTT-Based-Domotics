@@ -41,6 +41,12 @@ fake "{\n  \"node_id\": \"DISTANCE_01\",\n  \"msg_type\": \"sensor_data\",\n  \"
 fake "{\n  \"node_id\": \"LIGHT_01\",\n  \"msg_type\": \"sensor_data\",\n  \"timestamp\": 12345,\n  \"sensor_type\": \"light\",\n  \"msg_id\": 42,\n  \"data\": {\n    \"lux\": 456.7,\n    \"als\": 1234,\n    \"estado\": \"Brillante\"\n  }\n}"
 ```
 
+- Triggered event payload
+```bash
+fake "{\n \"node_id\": \"node_03\",\n \"msg_type\": \"alert\",\n \"event\": {\n   \"msg_type\": \"event\",\n   \"sensor_type\": \"ultrasonic\",\n   \"trigger_threshold\": 10.0,\n   \"trigger_type\": \"below\",\n   \"is_active\": true\n }\n}"
+```
+> For this type of payload, timestamp is attached by the Python bridge, to save communication bandwidth in the Serial channel with the Arduino.
+
 ### Components
 
 - **main.py** - Entry point for the CLI application

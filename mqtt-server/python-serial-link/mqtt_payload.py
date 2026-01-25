@@ -1,6 +1,7 @@
 import json
 import dataclasses
 from dataclasses import dataclass
+import time
 from typing import Literal
 
 MsgType = Literal["sensor_data", "command", "status", "config", "alert", "event"]
@@ -118,6 +119,7 @@ class EventTrigger:
     node_id: str
     msg_type: MsgType
     event: EventType
+    timestamp: int
     
     # EventTrigger example:
     # {
@@ -138,7 +140,8 @@ class EventTrigger:
         return EventTrigger(
             node_id=data["node_id"],
             msg_type=data["msg_type"],
-            event=event_data
+            event=event_data,
+            timestamp=int(time.time())
         )
 
 

@@ -15,7 +15,7 @@ export interface UltrasonicSensorData {
 
 export interface SensorDataMessage {
 	node_id: string;
-	msg_type: MsgType;
+	msg_type: "sensor_data";
 	msg_id: number;
 	sensor_type: SensorType;
 	data: LightSensorData | UltrasonicSensorData;

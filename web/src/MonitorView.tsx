@@ -1,10 +1,10 @@
 import { useEffect, useState } from "react";
-import type { MessageRecord, MQTTMessage } from "./models/mqtt_msg";
+import type { MessageRecord, MQTTMessage, StatusMessage } from "./models/mqtt_msg";
 import type { MqttClient } from "mqtt";
 import type { LightSensorData, SensorDataMessage, UltrasonicSensorData } from "./models/sensor_data";
 import type { MsgType } from "./models/incoming_msg";
 
-import type { EventType } from "./models/events";
+import type { EventTriggerMessage, EventType } from "./models/events";
 import type { MQTTServerConnectionStatus } from "./models/mqtt_status";
 
 interface MonitorViewProps {
@@ -20,6 +20,11 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
   // Store partial sensor data keyed by node_id
   const [partialLightData, setPartialLightData] = useState<Map<string, Partial<LightSensorData>>>(new Map());
   const [partialUltrasonicData, setPartialUltrasonicData] = useState<Map<string, Partial<UltrasonicSensorData>>>(new Map());
+
+  const formatUnixOrMillis = (value: number) => {
+    const date = value > 1e12 ? new Date(value) : new Date(value * 1000);
+    return date.toLocaleString("es-ES");
+  };
 
   const createSensorMessage = (
     nodeId: string,
@@ -43,7 +48,18 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
     mqttClient.on("message", (topic, payload) => {
       try {
         // Handle params/event topics (complete JSON messages)
-        if (topic.includes("params/event/")) {
+				if (topic.includes("params/event/alert")) {
+					const event_trigger = JSON.parse(payload.toString()) as MQTTMessage;
+					console.log("Received alert message:", event_trigger);
+					const messageRecord: MessageRecord = {
+						...event_trigger,
+						id: `${Date.now()}-${Math.random()}`,
+						receivedAt: new Date(),
+						topic,
+					};
+					setMessages((prev) => [messageRecord, ...prev].slice(0, 100));
+				}
+        else if (topic.includes("params/event/")) {
           const message = JSON.parse(JSON.parse(payload.toString())) as MQTTMessage;
           console.log("Received event message:", message);
           const messageRecord: MessageRecord = {
@@ -131,6 +147,32 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
             return updated;
           });
         }
+        // Handle status topics: status/NODE_NAME/last_update
+        else if (topic.startsWith("status/")) {
+          const parts = topic.split("/");
+          const nodeId = parts[1] || "unknown";
+          const field = parts[2];
+
+          if (field === "last_update") {
+            const timestamp = Number(payload.toString());
+            if (!Number.isNaN(timestamp)) {
+              const statusMsg: StatusMessage = {
+                node_id: nodeId,
+                msg_type: "status",
+                last_update: timestamp,
+              };
+
+              const messageRecord: MessageRecord = {
+                ...statusMsg,
+                id: `${Date.now()}-${Math.random()}`,
+                receivedAt: new Date(),
+                topic,
+              };
+
+              setMessages((prev) => [messageRecord, ...prev].slice(0, 100));
+            }
+          }
+        }
         
         console.log("Topic:", topic, "Payload:", payload.toString());
       } catch (err) {
@@ -190,6 +232,31 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
     );
   };
 
+  const renderStatusData = (message: MessageRecord) => {
+    if (message.msg_type !== "status") return null;
+
+    const statusMsg = message as StatusMessage;
+    return (
+      <div className="text-xs">
+        <div>Last Update: {formatUnixOrMillis(statusMsg.last_update)}</div>
+      </div>
+    );
+  };
+
+	const renderEventTriggerData = (message: MessageRecord) => {
+		if (message.msg_type !== "alert") return null;
+		const alertMsg = message as EventTriggerMessage;
+		return (
+			<div className="text-xs">
+				<div>Event Sensor: {alertMsg.event.sensor_type}</div>
+				<div>Trigger Threshold: {alertMsg.event.trigger_threshold}</div>
+				<div>Trigger Type: {alertMsg.event.trigger_type}</div>
+				<div>Is Active: {alertMsg.event.is_active ? "Yes" : "No"}</div>
+				<div>Timestamp: {formatUnixOrMillis(alertMsg.timestamp)}</div>
+			</div>
+		);
+	}
+
   const getMessageTypeColor = (msgType: MsgType) => {
     switch (msgType) {
       case "sensor_data": return "bg-blue-600";
@@ -239,7 +306,6 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
                 <th className="px-6 py-4 text-left font-semibold">Topic</th>
                 <th className="px-6 py-4 text-left font-semibold">Node ID</th>
                 <th className="px-6 py-4 text-left font-semibold">Type</th>
-                <th className="px-6 py-4 text-left font-semibold">MQTT Msg ID</th>
                 <th className="px-6 py-4 text-left font-semibold">Data</th>
               </tr>
             </thead>
@@ -270,11 +336,10 @@ export default function MonitorView({ mqttClient, connectionStatus }: MonitorVie
                       </span>
                     </td>
                     <td className="px-4 py-3">
-                      {"msg_id" in msg ? msg.msg_id : "-"}
-                    </td>
-                    <td className="px-4 py-3">
                       {msg.msg_type === "sensor_data" && renderSensorData(msg)}
                       {msg.msg_type === "event" && renderEventData(msg)}
+                      {msg.msg_type === "status" && renderStatusData(msg)}
+											{msg.msg_type === "alert" && renderEventTriggerData(msg)}
                     </td>
                   </tr>
                 ))
