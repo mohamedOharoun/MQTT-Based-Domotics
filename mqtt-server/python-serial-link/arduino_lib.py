@@ -37,23 +37,51 @@ START_MARKER = "comm:start$"
 END_MARKER = "$comm:end"
 
 def serial_to_mqtt_loop(mqtt_client: mqtt_lib.mqtt.Client) -> None:
+    frame_buffer = ""
+    in_frame = False
+    
     while True:
         try:
             line = read_serial_line()
             if not line:
+                time.sleep(0.02)
                 continue
             
-            if line.startswith(START_MARKER) and line.endswith(END_MARKER):
-                raw_payload = line[len(START_MARKER):-len(END_MARKER)]
+            # Check if this line contains the start marker
+            if START_MARKER in line:
+                in_frame = True
+                # Extract content after start marker
+                start_idx = line.index(START_MARKER) + len(START_MARKER)
+                frame_buffer = line[start_idx:]
+            elif in_frame:
+                # We're inside a frame, accumulate the line
+                frame_buffer += "\n" + line
+            
+            # Check if this line contains the end marker
+            if in_frame and END_MARKER in line:
+                in_frame = False
+                # Extract content before end marker
+                end_idx = frame_buffer.index(END_MARKER)
+                raw_payload = frame_buffer[:end_idx]
+                frame_buffer = ""
+                
+                # Strip outer quotes if present (Arduino sends quoted JSON)
+                raw_payload = raw_payload.strip('"')
+                
+                print("Serial → MQTT  received complete framed payload")
                 try:
                     json_payload = mqtt_payload.parse_raw_payload(raw_payload)
+                    mqtt_lib.act_on_payload(json_payload, mqtt_client)
                 except json.JSONDecodeError:
                     print(f"serial → MQTT  invalid JSON payload: {raw_payload!r}")
-                    continue
-                
-                mqtt_lib.act_on_payload(json_payload, mqtt_client)
         except Exception as e:
             print(f"Serial read error: {e}")
+            if getattr(e, 'errno', None) == 6:
+                time.sleep(2)
+                print("Attempting to reconnect serial...")
+                
+            in_frame = False
+            frame_buffer = ""
 
         time.sleep(0.02)
 

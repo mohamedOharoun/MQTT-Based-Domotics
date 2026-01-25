@@ -7,7 +7,7 @@ import terminal_cli
 # ────────────────────────────────────────────────
 #  Configuration
 # ────────────────────────────────────────────────
-SERIAL_PORT    = '/dev/ttyACM0'     # ← change as needed
+SERIAL_PORT    = '/dev/cu.usbmodem14101'     # ← change as needed
 BAUD_RATE      = 9600
 MQTT_BROKER    = 'localhost'
 MQTT_PORT      = 1883

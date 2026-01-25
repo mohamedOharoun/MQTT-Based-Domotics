@@ -146,7 +146,7 @@ class EventTrigger:
 
 
 
-def parse_raw_payload(raw_payload: str) -> SensorData | EventTrigger:
+def parse_raw_payload(raw_payload: str) -> SensorData | EventTrigger | EventType:
     data_dict = json.loads(raw_payload)
     
     if isinstance(data_dict, str):
