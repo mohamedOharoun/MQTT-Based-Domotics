@@ -18,14 +18,19 @@ MQTT_PORT      = 1883
 def main():
     global ser
     global mqtt_client
-
-    ser = arduino_lib.setup_serial(SERIAL_PORT, BAUD_RATE)
-    mqtt_client = mqtt_lib.setup_mqtt(MQTT_BROKER, MQTT_PORT)
     
-    mqtt_client.on_message = arduino_lib.on_mqtt_message
-
     print("\nBidirectional MQTT ↔ Serial bridge started")
     print(  "───────────────────────────────────────")
+
+    ser = arduino_lib.setup_serial(SERIAL_PORT, BAUD_RATE)
+    
+    print(f"Serial port {SERIAL_PORT} opened at {BAUD_RATE} baud.")
+    print("Waiting for Arduino to reset...")
+    arduino_lib.wait_for_arduino(ser)
+    print("Arduino is ready.\n")
+    
+    mqtt_client = mqtt_lib.setup_mqtt(MQTT_BROKER, MQTT_PORT)
+    mqtt_client.on_message = arduino_lib.on_mqtt_message
 
     # Terminal input in background thread
     input_thread = threading.Thread(target=terminal_cli.terminal_input_thread, daemon=True, kwargs={'ser': ser, 'mqtt_client': mqtt_client})

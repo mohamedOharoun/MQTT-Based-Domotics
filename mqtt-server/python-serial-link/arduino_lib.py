@@ -20,6 +20,10 @@ def setup_serial(port: str, baud_rate: int) -> serial.Serial | None:
     
     return _active_serial
 
+def wait_for_arduino(ser: serial.Serial) -> None:
+    if ser and ser.is_open:
+        time.sleep(2.0)  # Wait for Arduino to reset
+
 def read_serial_line() -> str | None:
     if _active_serial and _active_serial.is_open and _active_serial.in_waiting > 0:
         try:
