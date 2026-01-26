@@ -52,7 +52,37 @@ double bandwidth_kHz[10] = {
 		41.7E3, 62.5E3, 125E3, 250E3, 500E3};
 
 /* ===================== RTC & VARS ===================== */
+
 RTCZero rtc;
+
+bool setDateTime(const char *date_str, const char *time_str)
+{
+	char month_str[4];
+	char months[12][4] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
+	uint16_t i, mday, month, hour, min, sec, year;
+
+	if (sscanf(date_str, "%3s %hu %hu", month_str, &mday, &year) != 3)
+		return false;
+	if (sscanf(time_str, "%hu:%hu:%hu", &hour, &min, &sec) != 3)
+		return false;
+
+	for (i = 0; i < 12; i++)
+	{
+		if (!strncmp(month_str, months[i], 3))
+		{
+			month = i + 1;
+			break;
+		}
+	}
+	if (i == 12)
+		return false;
+
+	rtc.setTime((uint8_t)hour, (uint8_t)min, (uint8_t)sec + 8);
+	rtc.setDate((uint8_t)mday, (uint8_t)month, (uint8_t)(year - 2000));
+	return true;
+}
+
+/* ===================== VARS ===================== */
 
 // Display Management
 enum DisplayState
@@ -137,10 +167,19 @@ void setup()
 	}
 	updateDisplay("MAESTRO", "INICIANDO...", "");
 
+	SerialUSB.print(__DATE__);
+	SerialUSB.print(" ");
+	SerialUSB.println(__TIME__);
 	rtc.begin();
-	// Set a default date/time if not set
-	rtc.setTime(12, 0, 0);
-	rtc.setDate(1, 1, 24);
+
+	if (!setDateTime(__DATE__, __TIME__))
+	{
+		SerialUSB.println("RTC setDateTime() failed!\nExiting ...");
+		while (1)
+		{
+			;
+		}
+	}
 
 	if (!LoRa.begin(868E6))
 	{
