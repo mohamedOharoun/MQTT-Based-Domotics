@@ -1,5 +1,3 @@
-import type { MsgType } from "./incoming_msg";
-
 export type SensorType = "light" | "ultrasonic";
 
 export interface LightSensorData {
