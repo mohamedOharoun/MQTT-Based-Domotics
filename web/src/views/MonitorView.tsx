@@ -1,3 +1,4 @@
+import { useMemo, useState } from "react";
 import type { MessageRecord, StatusMessage } from "../models/mqtt_msg";
 import type { LightSensorData, SensorDataMessage, UltrasonicSensorData } from "../models/sensor_data";
 import type { MsgType } from "../models/incoming_msg";
@@ -12,6 +13,15 @@ interface MonitorViewProps {
 
 export default function MonitorView({ connectionStatus }: MonitorViewProps) {
   const { messages, clearMessages } = useMessageContext();
+  const [msgTypeFilter, setMsgTypeFilter] = useState<MsgType | "all">("all");
+
+  const filteredMessages = useMemo(
+    () =>
+      msgTypeFilter === "all"
+        ? messages
+        : messages.filter((message) => message.msg_type === msgTypeFilter),
+    [messages, msgTypeFilter]
+  );
 
   const formatUnixOrMillis = (value: number) => {
     const date = value > 1e12 ? new Date(value) : new Date(value * 1000);
@@ -117,7 +127,24 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
           Clear Messages
         </button>
         
-        <span className="text-sm text-gray-400">Total: {messages.length}</span>
+        <div className="flex items-center gap-4 text-sm text-gray-200">
+          <label className="text-gray-400" htmlFor="msg-type-filter">Filter by type</label>
+          <select
+            id="msg-type-filter"
+            value={msgTypeFilter}
+            onChange={(e) => setMsgTypeFilter(e.target.value as MsgType | "all")}
+            className="bg-[#2a2a2a] border border-gray-700 rounded px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600"
+          >
+            <option value="all">All</option>
+            <option value="sensor_data">sensor_data</option>
+            <option value="alert">alert</option>
+            <option value="event">event</option>
+            <option value="command">command</option>
+            <option value="status">status</option>
+            <option value="config">config</option>
+          </select>
+          <span className="text-gray-400">Showing {filteredMessages.length} of {messages.length}</span>
+        </div>
 				</div>
 
 				<div className="overflow-x-auto flex-1">
@@ -132,16 +159,18 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
               </tr>
             </thead>
             <tbody className="divide-y divide-gray-800">
-              {messages.length === 0 ? (
+              {filteredMessages.length === 0 ? (
                 <tr>
                   <td colSpan={7} className="px-6 py-12 text-center text-gray-500">
-                    {connectionStatus === "connected" 
-                      ? "No messages received yet. Waiting for data..."
-                      : "Connecting to MQTT broker..."}
+                    {messages.length === 0
+                      ? connectionStatus === "connected"
+                        ? "No messages received yet. Waiting for data..."
+                        : "Connecting to MQTT broker..."
+                      : "No messages match the selected type."}
                   </td>
                 </tr>
               ) : (
-                messages.map((msg) => (
+                filteredMessages.map((msg) => (
                   <tr key={msg.id} className="hover:bg-[#2a2a2a] transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap text-gray-400">
                       {formatReceivedAt(msg.receivedAt)}

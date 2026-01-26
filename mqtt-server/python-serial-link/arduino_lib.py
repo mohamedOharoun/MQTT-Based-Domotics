@@ -2,6 +2,7 @@ import serial
 import time
 import json
 
+from main import BAUD_RATE
 import mqtt_payload
 import mqtt_lib
 
@@ -12,8 +13,11 @@ def setup_serial(port: str, baud_rate: int) -> serial.Serial | None:
     
     try:
         _active_serial = serial.Serial(port, baud_rate, timeout=1)
-        time.sleep(2.5)  # Arduino reset delay
         print(f"Serial port opened: {port} @ {baud_rate}")
+        print("Waiting for Arduino to reset...")
+        wait_for_arduino(_active_serial)
+        time.sleep(2.5)  # Extra wait to ensure Arduino is ready
+        print("Arduino is ready.\n")
     except Exception as e:
         print(f"Serial open failed: {e}")
         print("Continuing without serial (MQTT → terminal only)")
@@ -22,7 +26,7 @@ def setup_serial(port: str, baud_rate: int) -> serial.Serial | None:
 
 def wait_for_arduino(ser: serial.Serial) -> None:
     if ser and ser.is_open:
-        time.sleep(2.0)  # Wait for Arduino to reset
+        time.sleep(2.0)
 
 def read_serial_line() -> str | None:
     if _active_serial and _active_serial.is_open and _active_serial.in_waiting > 0:
@@ -53,25 +57,19 @@ def serial_to_mqtt_loop(mqtt_client: mqtt_lib.mqtt.Client) -> None:
             
             print("DEBUG: Serial read line:", line)
             
-            # Check if this line contains the start marker
             if START_MARKER in line:
                 in_frame = True
-                # Extract content after start marker
                 start_idx = line.index(START_MARKER) + len(START_MARKER)
                 frame_buffer = line[start_idx:]
             elif in_frame:
-                # We're inside a frame, accumulate the line
                 frame_buffer += "\n" + line
             
-            # Check if this line contains the end marker
             if in_frame and END_MARKER in line:
                 in_frame = False
-                # Extract content before end marker
                 end_idx = frame_buffer.index(END_MARKER)
                 raw_payload = frame_buffer[:end_idx]
                 frame_buffer = ""
                 
-                # Strip outer quotes if present (Arduino sends quoted JSON)
                 raw_payload = raw_payload.strip('"')
                 
                 print("Serial → MQTT  received complete framed payload")
