@@ -1,13 +1,6 @@
 /* ---------------------------------------------------------------------
- * Grado Ingeniería Informática. Cuarto curso. Internet de las Cosas, IC
- * Grupo 41
- * Autores:
- *      - Wail Ben El Hassane Boudhar
- *      - Mohamed O. Haroun Zarkik
- *
- * NODO MAESTRO
- * Inicio con Máximo Alcance + Optimización Progresiva
- * Payload BINARIO desde el esclavo
+ * NODO MAESTRO (FINAL STABLE VERSION)
+ * Fixes: Removes Serial Blocking risks & LoRa Mode conflicts
  * ---------------------------------------------------------------------
  */
 
@@ -16,248 +9,362 @@
 #include <Arduino_PMIC.h>
 #include <Wire.h>
 #include <RTCZero.h>
+#include <ArduinoJson.h>
+
+// OLED
+#include <Adafruit_GFX.h>
+#include <Adafruit_SSD1306.h>
 
 #include "globals.h"
 
+/* ===================== OLED CONFIG ===================== */
+#define SCREEN_WIDTH 128
+#define SCREEN_HEIGHT 64
+Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
+
 /* ===================== CONFIG ===================== */
-#define TX_LAPSE_MS 5000
-#define ADJUSTMENT_SAMPLES 5
-#define CONFIG_WAIT_TIME 4000
+#define MSG_TYPE_DATA 0x01
+#define MSG_TYPE_SENSOR 0x05
 
-/* ===================== MESSAGE TYPES ===================== */
-#define MSG_TYPE_DATA        0x01
-#define MSG_TYPE_ECHO        0x02
-#define MSG_TYPE_CONFIG      0x03
-#define MSG_TYPE_CONFIG_ACK  0x04
-#define MSG_TYPE_SENSOR      0x05
+#define SENSOR_ID_ULTRA 0x01
+#define SENSOR_ID_LIGHT 0x02
 
-/* ===================== SENSOR PROTOCOL ===================== */
-#define SENSOR_ID_ULTRA_01        0x01
-#define SENSOR_TYPE_ULTRASONIC   0x01
+#define DIST_STATE_ERROR 0x00
+#define DIST_STATE_CLOSE 0x01
+#define DIST_STATE_MEDIUM 0x02
+#define DIST_STATE_FAR 0x03
 
-#define DIST_STATE_ERROR   0x00
-#define DIST_STATE_CLOSE   0x01
-#define DIST_STATE_MEDIUM  0x02
-#define DIST_STATE_FAR     0x03
+#define LIGHT_STATE_DARK 0x00
+#define LIGHT_STATE_DIM 0x01
+#define LIGHT_STATE_BRIGHT 0x02
 
 /* ===================== ADDRESSES ===================== */
 const uint8_t localAddress = 0xAA;
-uint8_t destination = 0xBB;
 
-/* ===================== LORA STATE ===================== */
-volatile bool txDoneFlag = true;
-volatile bool transmitting = false;
-
-/* ===================== QUALITY THRESHOLDS ===================== */
-#define RSSI_EXCELLENT -50
-#define RSSI_GOOD      -70
-#define RSSI_FAIR      -90
-#define RSSI_POOR      -110
-
-#define SNR_EXCELLENT  12.0
-#define SNR_GOOD       8.0
-#define SNR_FAIR       3.0
-#define SNR_POOR      -3.0
-
-/* ===================== DYNAMIC PARAMETERS ===================== */
+/* ===================== LORA PARAMETERS ===================== */
 uint8_t currentSF = 12;
-const uint8_t minSF = 7;
-const uint8_t maxSF = 12;
-
 uint8_t currentBW = 7;
-const uint8_t minBW = 6;
-const uint8_t maxBW = 9;
-
 uint8_t currentCR = 8;
-const uint8_t minCR = 5;
-const uint8_t maxCR = 8;
-
 uint8_t currentPower = 20;
-const uint8_t minPower = 2;
-const uint8_t maxPower = 20;
-
-/* Pending configuration */
-uint8_t pendingSF, pendingBW, pendingCR, pendingPower;
-bool configPending = false;
-uint32_t configSentTime = 0;
 
 double bandwidth_kHz[10] = {
-  7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
-  41.7E3, 62.5E3, 125E3, 250E3, 500E3
-};
+		7.8E3, 10.4E3, 15.6E3, 20.8E3, 31.25E3,
+		41.7E3, 62.5E3, 125E3, 250E3, 500E3};
 
-/* ===================== METRICS ===================== */
-struct SignalMetrics {
-  int rssi_sum;
-  float snr_sum;
-  uint8_t samples;
-} slaveMetrics = {0, 0.0, 0};
-
-uint32_t txStartTime = 0;
-uint32_t lastSuccessfulRx = 0;
-uint16_t successfulPackets = 0;
-uint8_t consecutiveFails = 0;
-bool linkEstablished = false;
-
-/* ===================== STATE ===================== */
-enum State {
-  STATE_NORMAL,
-  STATE_WAITING_CONFIG_ACK
-};
-State currentState = STATE_NORMAL;
-
-/* ===================== RTC ===================== */
+/* ===================== RTC & VARS ===================== */
 RTCZero rtc;
 
-/* ===================== APPLY CONFIG ===================== */
-void applyConfiguration() {
-  LoRa.idle();
-  delay(50);
+// Display Management
+enum DisplayState
+{
+	DISPLAY_IDLE,
+	DISPLAY_EVENT,
+	DISPLAY_SENSOR
+};
+DisplayState currentDisplayState = DISPLAY_IDLE;
+uint32_t displayTimer = 0;
+String dispLine1, dispLine2, dispLine3;
 
-  LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));
-  LoRa.setSpreadingFactor(currentSF);
-  LoRa.setCodingRate4(currentCR);
-  LoRa.setTxPower(currentPower, PA_OUTPUT_PA_BOOST_PIN);
-  LoRa.setPreambleLength(currentSF >= 11 ? 16 : 8);
-  LoRa.enableCrc();
-  LoRa.setSyncWord(0x12);
+// Event Management
+const uint8_t MAX_EVENTS = 10;
+struct Event
+{
+	char sensorType[16];
+	uint8_t triggerType; // 0:Above, 1:Below, 2:Equal
+	float threshold;
+	char action[32];
+	bool active;
+	bool triggered;
+	uint32_t lastTrigger;
+};
+Event events[MAX_EVENTS];
+uint8_t eventCount = 0;
 
-  LoRa.receive();
+// Serial Buffer
+#define FRAME_START "comm:start$"
+#define FRAME_END "$comm:end"
+char serialBuf[512];
+uint16_t bufIdx = 0;
+bool frameInprog = false;
 
-  Serial.println("\nCONFIG APLICADA:");
-  Serial.println(" SF: " + String(currentSF));
-  Serial.println(" BW: " + String(bandwidth_kHz[currentBW] / 1000.0) + " kHz");
-  Serial.println(" CR: 4/" + String(currentCR));
-  Serial.println(" Power: " + String(currentPower) + " dBm\n");
+/* ===================== HELPERS ===================== */
+void updateDisplay(String l1, String l2, String l3, int duration = 0)
+{
+	display.clearDisplay();
+	display.setTextSize(1);
+	display.setTextColor(SSD1306_WHITE);
+	display.setCursor(0, 0);
+	display.println(l1);
+	display.println(l2);
+	display.println(l3);
+	display.display();
+
+	if (duration > 0)
+	{
+		displayTimer = millis() + duration;
+		currentDisplayState = DISPLAY_EVENT;
+	}
 }
 
-/* ===================== SEND MESSAGE ===================== */
-void sendMessage(uint8_t *payload, uint8_t length, uint16_t id) {
-  while (!LoRa.beginPacket()) delay(5);
-
-  LoRa.write(destination);
-  LoRa.write(localAddress);
-  LoRa.write(id >> 8);
-  LoRa.write(id & 0xFF);
-  LoRa.write(length);
-  LoRa.write(payload, length);
-
-  LoRa.endPacket(true);
-}
-
-/* ===================== QUALITY ===================== */
-String evaluateSignalQuality(int rssi, float snr) {
-  if (rssi > RSSI_EXCELLENT && snr > SNR_EXCELLENT) return "EXCELENTE";
-  if (rssi > RSSI_GOOD && snr > SNR_GOOD) return "BUENA";
-  if (rssi > RSSI_FAIR && snr > SNR_FAIR) return "ACEPTABLE";
-  if (rssi > RSSI_POOR && snr > SNR_POOR) return "POBRE";
-  return "MUY POBRE";
+void applyConfiguration()
+{
+	LoRa.idle(); // Put radio in standby
+	delay(50);
+	LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));
+	LoRa.setSpreadingFactor(currentSF);
+	LoRa.setCodingRate4(currentCR);
+	LoRa.setTxPower(currentPower, PA_OUTPUT_PA_BOOST_PIN);
+	LoRa.setPreambleLength(16);
+	LoRa.enableCrc();
+	LoRa.setSyncWord(0x12);
+	// NOTE: Do NOT call LoRa.receive() here for Polling Mode.
+	// parsePacket() handles the mode switch automatically.
 }
 
 /* ===================== SETUP ===================== */
-void setup() {
-  Serial.begin(115200);
-  while (!Serial);
+void setup()
+{
+	Serial.begin(115200);
+	// Removed "while(!Serial)" to prevent battery hang,
+	// but ensure you open monitor quickly!
+	delay(2000);
 
-  if (!LoRa.begin(868E6)) {
-    Serial.println("Error LoRa");
-    while (1);
-  }
+	if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3D))
+	{
+		Serial.println("OLED Failed");
+		while (1)
+			;
+	}
+	updateDisplay("MAESTRO", "INICIANDO...", "");
 
-  applyConfiguration();
+	rtc.begin();
+	// Set a default date/time if not set
+	rtc.setTime(12, 0, 0);
+	rtc.setDate(1, 1, 24);
 
-  LoRa.onReceive(onReceive);
-  LoRa.onTxDone(TxFinished);
-  LoRa.receive();
+	if (!LoRa.begin(868E6))
+	{
+		Serial.println("LoRa Failed");
+		updateDisplay("ERROR", "LORA FAIL", "");
+		while (1)
+			;
+	}
 
-  Serial.println("MAESTRO LISTO (BINARIO)");
+	applyConfiguration();
+
+	Serial.println("\nMAESTRO LISTO (PURE POLLING)");
+	updateDisplay("MAESTRO OK", "Esperando...", "");
 }
 
 /* ===================== LOOP ===================== */
-void loop() {
-  static uint32_t lastSendTime = 0;
-  static uint16_t msgCount = 0;
+void loop()
+{
+	static uint32_t lastBeat = 0;
 
-  if (currentState == STATE_NORMAL &&
-      !transmitting &&
-      (millis() - lastSendTime) > TX_LAPSE_MS) {
+	// 1. Heartbeat (Visual Debug)
+	if (millis() - lastBeat > 1000)
+	{
+		lastBeat = millis();
+		// If these dots stop, your code is FROZEN (Serial buffer full or I2C hang)
+		Serial.print(".");
+	}
 
-    uint8_t payload[8];
-    uint8_t len = 0;
+	// 2. LoRa Polling
+	int packetSize = LoRa.parsePacket();
+	if (packetSize)
+	{
+		Serial.println("\nRX!"); // Debug print
+		processPacket(packetSize);
+	}
 
-    payload[len++] = MSG_TYPE_DATA;
-    payload[len++] = 'M';
-    payload[len++] = '0' + (msgCount % 10);
+	// 3. Serial Input (Python)
+	while (Serial.available())
+	{
+		char c = Serial.read();
+		if (!frameInprog)
+		{
+			if (c == 'c')
+			{ // Quick check for start of "comm:start$"
+				serialBuf[bufIdx++] = c;
+			}
+			else if (bufIdx > 0)
+			{
+				serialBuf[bufIdx++] = c;
+				if (strstr(serialBuf, FRAME_START))
+				{
+					frameInprog = true;
+					bufIdx = 0;
+					memset(serialBuf, 0, sizeof(serialBuf));
+				}
+			}
+			else
+			{
+				bufIdx = 0; // Reset noise
+			}
+		}
+		else
+		{
+			serialBuf[bufIdx++] = c;
+			if (bufIdx >= 511)
+				bufIdx = 0; // Prevent overflow
+			if (c == 'd' && strstr(serialBuf, FRAME_END))
+			{ // End detected
+				char *end = strstr(serialBuf, FRAME_END);
+				*end = 0;
+				handleJsonCommand(serialBuf);
+				frameInprog = false;
+				bufIdx = 0;
+				memset(serialBuf, 0, sizeof(serialBuf));
+			}
+		}
+	}
 
-    transmitting = true;
-    txDoneFlag = false;
-    txStartTime = millis();
-
-    sendMessage(payload, len, msgCount++);
-
-    lastSendTime = millis();
-  }
-
-  if (transmitting && txDoneFlag) {
-    transmitting = false;
-    LoRa.receive();
-  }
+	// 4. Display Timeout
+	if (currentDisplayState != DISPLAY_IDLE && millis() > displayTimer && displayTimer != 0)
+	{
+		currentDisplayState = DISPLAY_IDLE;
+		displayTimer = 0;
+		updateDisplay("MAESTRO OK", "Eventos: " + String(eventCount), "Esperando...");
+	}
 }
 
-/* ===================== RECEIVE ===================== */
-void onReceive(int size) {
-  if (size == 0) return;
+/* ===================== LORA PROCESSING ===================== */
+void processPacket(int size)
+{
+	if (size == 0)
+		return;
 
-  uint32_t rxTime = millis();
+	// Read Header
+	LoRa.read(); // Recipient
+	uint8_t sender = LoRa.read();
+	uint16_t msgId = (LoRa.read() << 8) | LoRa.read();
+	uint8_t len = LoRa.read();
 
-  LoRa.read(); // recipient
-  LoRa.read(); // sender
-  uint16_t msgId = (LoRa.read() << 8) | LoRa.read();
-  uint8_t length = LoRa.read();
+	// Safety check
+	if (len > 30)
+		len = 30;
 
-  uint8_t buffer[32];
-  for (uint8_t i = 0; i < length && i < sizeof(buffer); i++)
-    buffer[i] = LoRa.read();
+	uint8_t buf[32];
+	for (int i = 0; i < len; i++)
+		buf[i] = LoRa.read();
 
-  uint8_t msgType = buffer[0];
+	// Check Type
+	if (buf[0] != MSG_TYPE_SENSOR)
+		return;
 
-  /* ===== SENSOR DATA (BINARY) ===== */
-  if (msgType == MSG_TYPE_SENSOR && length >= 6) {
+	uint8_t id = buf[1]; // Sensor ID
 
-    uint8_t sensorId = buffer[1];
-    uint16_t distanceCm = (buffer[3] << 8) | buffer[4];
-    uint8_t state = buffer[5];
+	// --- ULTRASONIC ---
+	if (id == SENSOR_ID_ULTRA)
+	{
+		uint16_t dist = (buf[3] << 8) | buf[4];
+		uint8_t st = buf[5];
+		String sStr = (st == 1) ? "Cerca" : (st == 2) ? "Medio"
+																		: (st == 3)		? "Lejos"
+																									: "Err";
 
-    String stateStr =
-      (state == DIST_STATE_CLOSE)  ? "Cerca"  :
-      (state == DIST_STATE_MEDIUM) ? "Medio"  :
-      (state == DIST_STATE_FAR)    ? "Lejos"  :
-                                     "Error";
+		Serial.print(" ULTRA [0x");
+		Serial.print(sender, HEX);
+		Serial.print("] ");
+		Serial.print(dist);
+		Serial.println("cm");
 
-    int rssi = LoRa.packetRssi();
-    float snr = LoRa.packetSnr();
+		if (currentDisplayState == DISPLAY_IDLE)
+			updateDisplay("ULTRA", String(dist) + "cm", sStr);
 
-    Serial.println("\n╔════════════════════════════════════════╗");
-    Serial.println("║   SENSOR ULTRASÓNICO (BINARIO)         ║");
-    Serial.println("╚════════════════════════════════════════╝");
-    Serial.println("Sensor ID: " + String(sensorId));
-    Serial.println("Distancia: " + String(distanceCm) + " cm");
-    Serial.println("Estado: " + stateStr);
-    Serial.println("RSSI: " + String(rssi) + " dBm");
-    Serial.println("SNR: " + String(snr) + " dB");
-    Serial.println("════════════════════════════════════════\n");
+		serialbridge_report_ultrasonic_sensor_data(sender, msgId, dist, sStr.c_str());
+		checkEvents(id, "ultrasonic", (float)dist);
+	}
 
-    serialbridge_report_ultrasonic_sensor_data(
-      sensorId, msgId, distanceCm, stateStr.c_str()
-    );
+	// --- LIGHT ---
+	else if (id == SENSOR_ID_LIGHT)
+	{
+		uint16_t lux = (buf[3] << 8) | buf[4];
+		uint8_t st = buf[5];
+		String sStr = (st == 2) ? "Bright" : (st == 1) ? "Dim"
+																									 : "Dark";
 
-    lastSuccessfulRx = rxTime;
-    successfulPackets++;
-    return;
-  }
+		Serial.print(" LIGHT [0x");
+		Serial.print(sender, HEX);
+		Serial.print("] ");
+		Serial.print(lux);
+		Serial.println("lx");
+
+		if (currentDisplayState == DISPLAY_IDLE)
+			updateDisplay("LIGHT", String(lux) + "lx", sStr);
+
+		serialbridge_report_light_sensor_data(sender, msgId, (double)lux, (int32_t)lux, sStr.c_str());
+		checkEvents(id, "light", (float)lux);
+	}
 }
 
-/* ===================== TX DONE ===================== */
-void TxFinished() {
-  txDoneFlag = true;
+/* ===================== LOGIC & EVENTS ===================== */
+void handleJsonCommand(char *json)
+{
+	StaticJsonDocument<512> doc;
+	if (deserializeJson(doc, json))
+		return;
+
+	const char *type = doc["msg_type"];
+	if (strcmp(type, "event") == 0)
+	{
+		if (eventCount >= MAX_EVENTS)
+			return;
+		Event *e = &events[eventCount++];
+
+		strlcpy(e->sensorType, doc["sensor_type"], 16);
+		String trig = doc["trigger_type"];
+		e->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
+		e->threshold = doc["trigger_threshold"];
+		strlcpy(e->action, doc["action"], 32);
+		e->active = true;
+
+		Serial.println("Event Added!");
+		updateDisplay("CONFIG", "Event Added", "", 2000);
+	}
+	else if (strcmp(type, "clear_events") == 0)
+	{
+		eventCount = 0;
+		Serial.println("Events Cleared");
+		updateDisplay("CONFIG", "Events Cleared", "", 2000);
+	}
+}
+
+void checkEvents(uint8_t nodeId, const char *type, float val)
+{
+	for (int i = 0; i < eventCount; i++)
+	{
+		Event *e = &events[i];
+		if (strcmp(e->sensorType, type) != 0 || !e->active)
+			continue;
+
+		bool hit = false;
+		if (e->triggerType == 0 && val > e->threshold)
+			hit = true;
+		if (e->triggerType == 1 && val < e->threshold)
+			hit = true;
+		if (e->triggerType == 2 && abs(val - e->threshold) < 0.1)
+			hit = true;
+
+		if (hit && (!e->triggered || (millis() - e->lastTrigger > 5000)))
+		{
+			e->triggered = true;
+			e->lastTrigger = millis();
+
+			// TRIGGER!
+			Serial.print(">>> EVENT: ");
+			Serial.println(e->action);
+			updateDisplay("ALERT!", e->action, String(val), 4000);
+
+			EventType_t evtRpt;
+			evtRpt.trigger_threshold = e->threshold;
+			evtRpt.is_active = true;
+			evtRpt.trigger_type = (e->triggerType == 0) ? TRIGGER_ABOVE : (e->triggerType == 1 ? TRIGGER_BELOW : TRIGGER_EQUAL);
+			serialbridge_report_event_trigger(nodeId, &evtRpt);
+		}
+		else if (!hit)
+		{
+			e->triggered = false;
+		}
+	}
 }
