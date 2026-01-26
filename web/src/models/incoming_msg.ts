@@ -1,1 +1,1 @@
-export type MsgType = "sensor_data" | "command" | "status" | "config" | "alert" | "event";
+export type MsgType = "sensor_data" | "status" | "alert" | "event";

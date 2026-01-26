@@ -125,6 +125,7 @@ class EventTrigger:
     # {
     #     "node_id": "node_03",
     #     "msg_type": "alert",
+    #     "timestamp": 173927397333,
     #     "event": {
     #         "msg_type": "event",
     #         "sensor_type": "ultrasonic",
