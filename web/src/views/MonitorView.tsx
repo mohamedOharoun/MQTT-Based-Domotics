@@ -101,9 +101,7 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
       case "sensor_data": return "bg-blue-600";
       case "alert": return "bg-red-600";
       case "event": return "bg-yellow-600";
-      case "command": return "bg-green-600";
       case "status": return "bg-purple-600";
-      case "config": return "bg-orange-600";
       default: return "bg-gray-600";
     }
   };
@@ -139,9 +137,7 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
             <option value="sensor_data">sensor_data</option>
             <option value="alert">alert</option>
             <option value="event">event</option>
-            <option value="command">command</option>
             <option value="status">status</option>
-            <option value="config">config</option>
           </select>
           <span className="text-gray-400">Showing {filteredMessages.length} of {messages.length}</span>
         </div>
