@@ -1,5 +1,11 @@
 # MQTT Based Domotics
 
+## Table of Contents
+
+- [Arduino node mesh and sensors](#arduino-node-mesh-and-sensors)
+- [Python Serial Bridge Communication](#python-serial-bridge-communication)
+- [MQTT Web Monitor](#mqtt-web-monitor)
+
 ## Arduino node mesh and sensors
 
 ### Overview
@@ -20,7 +26,7 @@ Located in `arduino/LoRa/Master/`:
 #### Master Serial-Bridge Communication Protocol
 
 Serial payload structure (JSON):
-```json
+```jsonc
 {
 	"node_id": "LIGHT_01",
 	"msg_type": "sensor_data",
@@ -36,17 +42,17 @@ Serial payload structure (JSON):
 }
 ```
 
-## LoRa Protocol Data Structure
+### LoRa Protocol Data Structure
 
 The LoRa protocol used in this system implements a custom packet structure:
 
-### Packet Format (Binary Layout)
+#### Packet Format (Binary Layout)
 
 ```
 [DESTINATION_ADDRESS] [SENDER_ADDRESS] [MSG_ID] [PAYLOAD_LENGTH] [PAYLOAD]
 ```
 
-### Field Descriptions
+#### Field Descriptions
 - **SENDER AND DESTIONATION ADDRESS** (1 byte): local arduino address to identify over the network
 
 - **MSG_ID** (1 byte): Unique identifier of the LoRa message
@@ -157,11 +163,11 @@ fake "{\n \"node_id\": \"node_03\",\n \"msg_type\": \"alert\",\n \"event\": {\n 
 
 ### Configuration
 
-Ensure your MQTT broker is running with the configuration in `config/mosquitto.conf` before starting the CLI.
+Ensure your MQTT broker is running with the configuration in `mqtt-server/config/mosquitto.conf` before starting the CLI.
 
 ### Troubleshooting
 
-Check the `log/` directory for application logs if you encounter issues.
+Check the `mqtt-server/log/` directory for application logs if you encounter issues.
 
 ## MQTT Web Monitor
 
