@@ -17,27 +17,6 @@
 
 #include "globals.h"
 
-/* ===================== OLED CONFIG ===================== */
-#define SCREEN_WIDTH 128
-#define SCREEN_HEIGHT 64
-Adafruit_SSD1306 display(SCREEN_WIDTH, SCREEN_HEIGHT, &Wire, -1);
-
-/* ===================== CONFIG ===================== */
-#define MSG_TYPE_DATA 0x01
-#define MSG_TYPE_SENSOR 0x05
-
-#define SENSOR_ID_ULTRA 0x01
-#define SENSOR_ID_LIGHT 0x02
-
-#define DIST_STATE_ERROR 0x00
-#define DIST_STATE_CLOSE 0x01
-#define DIST_STATE_MEDIUM 0x02
-#define DIST_STATE_FAR 0x03
-
-#define LIGHT_STATE_DARK 0x00
-#define LIGHT_STATE_DIM 0x01
-#define LIGHT_STATE_BRIGHT 0x02
-
 /* ===================== ADDRESSES ===================== */
 const uint8_t localAddress = 0xAA;
 
@@ -102,10 +81,10 @@ struct Event
 	char sensorType[16];
 	uint8_t triggerType; // 0:Above, 1:Below, 2:Equal
 	float threshold;
-	char action[32];
 	bool active;
 	bool triggered;
 	uint32_t lastTrigger;
+	char alertMessage[64];
 };
 Event events[MAX_EVENTS];
 uint8_t eventCount = 0;
@@ -355,8 +334,8 @@ void handleJsonCommand(char *json)
 		String trig = doc["trigger_type"];
 		e->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
 		e->threshold = doc["trigger_threshold"];
-		strlcpy(e->action, doc["action"], 32);
 		e->active = true;
+		strlcpy(e->alertMessage, doc["alert_message"], 64);
 
 		Serial.println("Event Added!");
 		updateDisplay("CONFIG", "Event Added", "", 2000);
@@ -392,13 +371,16 @@ void checkEvents(uint8_t nodeId, const char *type, float val)
 
 			// TRIGGER!
 			Serial.print(">>> EVENT: ");
-			Serial.println(e->action);
-			updateDisplay("ALERT!", e->action, String(val), 4000);
+			Serial.println(e->alertMessage);
+			updateDisplay("ALERT!", e->alertMessage, String(val), 4000);
 
 			EventType_t evtRpt;
 			evtRpt.trigger_threshold = e->threshold;
 			evtRpt.is_active = true;
 			evtRpt.trigger_type = (e->triggerType == 0) ? TRIGGER_ABOVE : (e->triggerType == 1 ? TRIGGER_BELOW : TRIGGER_EQUAL);
+			evtRpt.sensor_type = e->sensorType;
+			evtRpt.alert_message = e->alertMessage;
+
 			serialbridge_report_event_trigger(nodeId, &evtRpt);
 		}
 		else if (!hit)

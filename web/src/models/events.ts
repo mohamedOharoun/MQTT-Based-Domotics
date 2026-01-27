@@ -6,6 +6,7 @@ export interface EventType {
 	trigger_threshold: number;
 	trigger_type: "above" | "below" | "equal";
 	is_active: boolean;
+	alert_message: string;
 }
 
 export interface EventTriggerMessage {

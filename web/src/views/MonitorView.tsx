@@ -91,6 +91,7 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
 				<div>Trigger Threshold: {alertMsg.event.trigger_threshold}</div>
 				<div>Trigger Type: {alertMsg.event.trigger_type}</div>
 				<div>Is Active: {alertMsg.event.is_active ? "Yes" : "No"}</div>
+				<div>Message: "{alertMsg.event.alert_message}"</div>
 				<div>Timestamp: {formatUnixOrMillis(alertMsg.timestamp)}</div>
 			</div>
 		);

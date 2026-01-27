@@ -67,7 +67,7 @@ def upload_sensor_data(mqtt_client: mqtt.Client, sensor_data: mqtt_payload.Senso
             
 
 def upload_event_trigger(mqtt_client: mqtt.Client, event_trigger: mqtt_payload.EventTrigger):
-    topic = f"params/event/alerts/{event_trigger.node_id}_{event_trigger.event.sensor_type}"
+    topic = f"params/event/alerts/{event_trigger.node_id}"
     payload = mqtt_payload.to_raw_payload(event_trigger)
     upload(mqtt_client, "", topic, payload, retain=False, qos=1)
     

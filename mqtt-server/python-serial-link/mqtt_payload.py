@@ -93,6 +93,7 @@ class EventType:
     sensor_type: SensorType
     trigger_threshold: float | int
     trigger_type: Literal["above", "below", "equal"]
+    alert_message: str
     is_active: bool
     
     # EventType example:
@@ -101,6 +102,7 @@ class EventType:
     #         "sensor_type": "ultrasonic",
     #         "trigger_threshold": 10.0,
     #         "trigger_type": "below",
+    #         "alert_message": "Something happened",
     #         "is_active": true
     #     }
     
@@ -111,6 +113,7 @@ class EventType:
             sensor_type=data["sensor_type"],
             trigger_threshold=data["trigger_threshold"],
             trigger_type=data["trigger_type"],
+            alert_message=data.get("alert_message", ""),
             is_active=data["is_active"]
         )
 
@@ -131,6 +134,7 @@ class EventTrigger:
     #         "sensor_type": "ultrasonic",
     #         "trigger_threshold": 10.0,
     #         "trigger_type": "below",
+    #         "alert_message": "Something happened",
     #         "is_active": true
     #     }
     # }

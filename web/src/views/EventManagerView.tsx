@@ -15,6 +15,7 @@ const defaultNewEvent: EntryEventType = {
 	is_active: true,
 	msg_type: "event",
 	topic: "example_event_name",
+	alert_message: "Alert triggered!",
 };
 
 interface EventManagerViewProps {
@@ -81,6 +82,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			trigger_type: newEvent.trigger_type,
 			is_active: newEvent.is_active,
 			msg_type: "event",
+			alert_message: newEvent.alert_message || "",
 		};
 
 		publishEvent(createdEvent, newEvent.topic);
@@ -94,6 +96,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			const updatedEvent: EventType = {
 				sensor_type: event.sensor_type,
 				trigger_threshold: event.trigger_threshold,
+				alert_message: event.alert_message || "",
 				trigger_type: event.trigger_type,
 				is_active: !currentState,
 				msg_type: "event",
@@ -123,6 +126,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 				const updatedEvent: EventType = {
 					sensor_type: editFormData.sensor_type || event.sensor_type,
 					trigger_threshold: editFormData.trigger_threshold !== undefined ? editFormData.trigger_threshold : event.trigger_threshold,
+					alert_message: editFormData.alert_message || event.alert_message || "",
 					trigger_type: editFormData.trigger_type || event.trigger_type,
 					is_active: event.is_active,
 					msg_type: "event",
@@ -222,6 +226,22 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 						</div>
 					</div>
 
+					<div className="flex flex-col gap-2">
+						<label className="text-sm font-medium">Alert Message (max 20)</label>
+						<input
+							type="text"
+							maxLength={20}
+							value={newEvent.alert_message || ""}
+							onChange={(e) =>
+								setNewEvent((prev) => ({
+									...prev,
+									alert_message: e.target.value,
+								}))
+							}
+							className="px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
+						/>
+					</div>
+
 					<div className="flex gap-2 md:col-span-2">
 						<button
 							onClick={handleCreateEvent}
@@ -241,6 +261,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 							<th className="px-6 py-4 text-left font-semibold">Sensor Type</th>
 							<th className="px-6 py-4 text-left font-semibold">Threshold</th>
 							<th className="px-6 py-4 text-left font-semibold">Threshold Type</th>
+							<th className="px-6 py-4 text-left font-semibold">Trigger Message</th>
 							<th className="px-6 py-4 text-left font-semibold">Status</th>
 							<th className="px-6 py-4 text-left font-semibold">Actions</th>
 						</tr>
@@ -313,12 +334,34 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 													</select>
 												</div>
 											</td>
+											<td className="px-4 py-3">
+												<input
+													type="text"
+													minLength={0}
+													min={0}
+													max={20}
+													maxLength={20}
+													value={
+														editFormData.alert_message !== undefined
+															? editFormData.alert_message
+															: event.alert_message
+													}
+													onChange={(e) =>
+														handleEditChange(
+															"alert_message",
+															e.target.value
+														)
+													}
+													className="px-2 py-1 bg-[#2a2a2a] border border-gray-700 rounded text-sm w-20 focus:outline-none focus:border-blue-500"
+												/>
+											</td>
 										</>
 									) : (
 										<>
 											<td className="px-4 py-3">{capitalize(event.sensor_type)}</td>
 											<td className="px-4 py-3">{event.trigger_threshold}</td>
 											<td className="px-4 py-3">{capitalize(event.trigger_type)}</td>
+											<td className="px-4 py-3">{event.alert_message || "-"}</td>
 										</>
 									)}
 									<td className="px-4 py-3">
