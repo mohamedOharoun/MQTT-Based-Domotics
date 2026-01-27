@@ -10,6 +10,7 @@ import EventManagerView from "./views/EventManagerView";
 
 const HOST = "localhost";
 const PORT = 9001;
+const MAX_EVENTS = 10;
 
 export function App() {
 	const MQTT_SERVER_URL= `ws://${HOST}:${PORT}`;
@@ -87,7 +88,7 @@ export function App() {
 			{toggleMonitor ? (
 				<MonitorView connectionStatus={connectionStatus} />
 			) : (
-				<EventManagerView mqtt_client={client}/>
+				<EventManagerView mqtt_client={client} MAX_EVENTS={MAX_EVENTS} />
 			)}
 
 			{error && (

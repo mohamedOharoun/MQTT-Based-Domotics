@@ -320,20 +320,51 @@ void handleJsonCommand(char *json)
 	const char *type = doc["msg_type"];
 	if (strcmp(type, "event") == 0)
 	{
-		if (eventCount >= MAX_EVENTS)
-			return;
-		Event *e = &events[eventCount++];
+		const char *eventId = doc["event_id"];
 
-		strlcpy(e->event_id, doc["event_id"], 16);
-		strlcpy(e->sensorType, doc["sensor_type"], 16);
-		String trig = doc["trigger_type"];
-		e->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
-		e->threshold = doc["trigger_threshold"];
-		e->active = true;
-		strlcpy(e->alertMessage, doc["alert_message"], 64);
+		Event *existingEvent = nullptr;
+		for (int i = 0; i < eventCount; i++)
+		{
+			if (strcmp(events[i].event_id, eventId) == 0)
+			{
+				existingEvent = &events[i];
+				break;
+			}
+		}
 
-		Serial.println("Event Added!");
-		updateDisplay("CONFIG", "Event Added", "", 2000);
+		if (existingEvent != nullptr)
+		{
+			strlcpy(existingEvent->sensorType, doc["sensor_type"], 16);
+			String trig = doc["trigger_type"];
+			existingEvent->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
+			existingEvent->threshold = doc["trigger_threshold"];
+			existingEvent->active = doc["is_active"];
+			strlcpy(existingEvent->alertMessage, doc["alert_message"], 64);
+
+			Serial.println("Event Updated!");
+			updateDisplay("CONFIG", "Event Updated", "", 2000);
+		}
+		else
+		{
+			if (eventCount >= MAX_EVENTS)
+			{
+				Serial.println("Max events reached, cannot add more.");
+				updateDisplay("CONFIG", "Max Events Reached", "", 2000);
+				return;
+			}
+			Event *e = &events[eventCount++];
+
+			strlcpy(e->event_id, doc["event_id"], 16);
+			strlcpy(e->sensorType, doc["sensor_type"], 16);
+			String trig = doc["trigger_type"];
+			e->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
+			e->threshold = doc["trigger_threshold"];
+			e->active = doc["is_active"];
+			strlcpy(e->alertMessage, doc["alert_message"], 64);
+
+			Serial.println("Event Added!");
+			updateDisplay("CONFIG", "Event Added", "", 2000);
+		}
 	}
 	else if (strcmp(type, "clear_event") == 0)
 	{
@@ -351,12 +382,6 @@ void handleJsonCommand(char *json)
 				break;
 			}
 		}
-	}
-	else if (strcmp(type, "clear_events") == 0)
-	{
-		eventCount = 0;
-		Serial.println("Events Cleared");
-		updateDisplay("CONFIG", "Events Cleared", "", 2000);
 	}
 }
 

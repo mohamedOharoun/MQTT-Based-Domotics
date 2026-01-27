@@ -25,9 +25,10 @@ const defaultNewEvent: EntryEventType = {
 
 interface EventManagerViewProps {
 	mqtt_client: MqttClient | null;
+	MAX_EVENTS: number;
 }
 
-export default function EventManagerView({ mqtt_client }: EventManagerViewProps) {
+export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManagerViewProps) {
 	const { messages } = useMessageContext();
 	const [editingEventId, setEditingEventId] = useState<string | null>(null);
 	const [editFormData, setEditFormData] = useState<Partial<EntryEventType>>({});
@@ -69,6 +70,11 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 
 	const [newEvent, setNewEvent] = useState<EntryEventType>(defaultNewEvent);
 	const handleCreateEvent = async () => {
+		if (eventsToEdit.length >= MAX_EVENTS) {
+			console.warn("Maximum number of events reached");
+			return;
+		}
+
 		console.log("Creating event:", newEvent);
 
 		const createdEvent: EventType = {
@@ -152,21 +158,6 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			<div className="bg-[#1a1a1a] rounded-lg shadow-xl border border-gray-800 p-6">
 				<h2 className="text-lg font-semibold mb-4">Create New Event</h2>
 				<div className="flex justify-evenly items-center">
-					{/* <div className="flex flex-col gap-2">
-						<label className="text-sm font-medium">Event Name</label>
-						<input
-							type="text"
-							value={newEvent.topic}
-							onChange={(e) =>
-								setNewEvent((prev) => ({
-									...prev,
-									topic: e.target.value,
-								}))
-							}
-							className="px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
-						/>
-					</div> */}
-
 					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium">Sensor Type</label>
 						<div className="relative">
@@ -243,7 +234,8 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 					<div className="flex gap-2 md:col-span-2">
 						<button
 							onClick={handleCreateEvent}
-							className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition-colors flex-1"
+							className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded text-sm font-medium transition-colors flex-1 disabled:cursor-not-allowed disabled:opacity-50"
+							disabled={eventsToEdit.length >= MAX_EVENTS}
 						>
 							Create Event
 						</button>
@@ -251,24 +243,26 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 				</div>
 			</div>
 
+			<h2 className="text-lg font-semibold mb-4">Configured Events (Max events: {MAX_EVENTS})</h2>
+
 			<div className="overflow-x-auto flex-1">
-				<table className="w-full text-sm bg-[#1a1a1a] rounded-lg shadow-xl overflow-hidden border border-gray-800">
+				<table className="w-full text-sm bg-[#1a1a1a] rounded-lg shadow-xl overflow-hidden border border-gray-800 text-center">
 					<thead className="bg-[#2a2a2a] border-b border-gray-700 sticky top-0">
 						<tr>
-							<th className="px-6 py-4 text-left font-semibold">Topic</th>
-							<th className="px-6 py-4 text-left font-semibold">Event ID</th>
-							<th className="px-6 py-4 text-left font-semibold">Sensor Type</th>
-							<th className="px-6 py-4 text-left font-semibold">Threshold</th>
-							<th className="px-6 py-4 text-left font-semibold">Threshold Type</th>
-							<th className="px-6 py-4 text-left font-semibold">Trigger Message</th>
-							<th className="px-6 py-4 text-left font-semibold">Status</th>
-							<th className="px-6 py-4 text-left font-semibold">Actions</th>
+							<th className="px-6 py-4 font-semibold">Topic</th>
+							<th className="px-6 py-4 font-semibold">Event ID</th>
+							<th className="px-6 py-4 font-semibold">Sensor Type</th>
+							<th className="px-6 py-4 font-semibold">Threshold</th>
+							<th className="px-6 py-4 font-semibold">Threshold Type</th>
+							<th className="px-6 py-4 font-semibold">Trigger Message</th>
+							<th className="px-6 py-4 font-semibold">Status</th>
+							<th className="px-6 py-4 font-semibold">Actions</th>
 						</tr>
 					</thead>
 					<tbody className="divide-y divide-gray-800">
 						{eventsToEdit.length === 0 ? (
 							<tr>
-								<td colSpan={6} className="px-6 py-12 text-center text-gray-500">
+								<td colSpan={8} className="px-6 py-12 text-center text-gray-500">
 									No events configured. Create one above to get started.
 								</td>
 							</tr>
@@ -280,6 +274,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 									</td>
 									{editingEventId === event.id ? (
 										<>
+											<td className="px-4 py-3">{event.event_id}</td>
 											<td className="px-4 py-3">
 												<div className="relative">
 													<select
