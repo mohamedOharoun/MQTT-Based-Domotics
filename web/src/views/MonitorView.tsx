@@ -69,6 +69,8 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
         <div>Type: {eventMsg.trigger_type}</div>
         <div>Active: {eventMsg.is_active ? "Yes" : "No"}</div>
         <div>Message: {eventMsg.alert_message}</div>
+				<div>Target Device: {eventMsg.target_device}</div>
+				<div>Target Device Value: {eventMsg.target_device_value}</div>
       </div>
     );
   };
@@ -95,6 +97,8 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
 				<div>Trigger Type: {alertMsg.event.trigger_type}</div>
 				<div>Is Active: {alertMsg.event.is_active ? "Yes" : "No"}</div>
 				<div>Message: "{alertMsg.event.alert_message}"</div>
+				<div>Target Device: {alertMsg.event.target_device}</div>
+				<div>Target Device Value: {alertMsg.event.target_device_value}</div>
 				<div>Timestamp: {formatUnixOrMillis(alertMsg.timestamp)}</div>
 			</div>
 		);

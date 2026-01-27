@@ -49,13 +49,18 @@ void setup()
 	Serial.println("\n=== INICIANDO SISTEMA ===");
 
 	Wire.begin();
+	delay(100);
 
 	Serial.print("Iniciando VEML6030... ");
-	if (!light.begin())
+	bool lightSensorStarted = light.begin();
+	delay(100);
+	Serial.println("Estado de arranque de sensor de luz: " + String(lightSensorStarted ? "Encendido" : "Estado Desconocido"));
+	if (!lightSensorStarted)
 	{
 		Serial.println("FALLO");
 		Serial.println("Revisa conexiones: SDA, SCL, 3.3V, GND");
 		while (1)
+			;
 	}
 	Serial.println("OK");
 
@@ -67,6 +72,7 @@ void setup()
 		Serial.println("FALLO");
 		Serial.println("Revisa conexiones SPI: MOSI, MISO, SCK, CS, RST, DIO0");
 		while (1)
+			;
 	}
 
 	LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));

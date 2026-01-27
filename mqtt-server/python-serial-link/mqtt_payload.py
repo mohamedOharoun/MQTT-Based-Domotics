@@ -96,6 +96,8 @@ class EventType:
     trigger_type: Literal["above", "below", "equal"]
     alert_message: str
     is_active: bool
+    target_device: str
+    target_device_value: float | int
     
     # EventType example:
     #     {
@@ -106,6 +108,8 @@ class EventType:
     #         "trigger_type": "below",
     #         "alert_message": "Something happened",
     #         "is_active": true
+    #         "target_device": "curtains_01",
+    #         "target_device_value": 1.0
     #     }
     
     @staticmethod
@@ -117,7 +121,9 @@ class EventType:
             trigger_threshold=data["trigger_threshold"],
             trigger_type=data["trigger_type"],
             alert_message=data.get("alert_message", ""),
-            is_active=data["is_active"]
+            is_active=data["is_active"],
+            target_device=data["target_device"],
+            target_device_value=data["target_device_value"]
         )
 
 @dataclass
@@ -138,7 +144,9 @@ class EventTrigger:
     #         "trigger_threshold": 10.0,
     #         "trigger_type": "below",
     #         "alert_message": "Something happened",
-    #         "is_active": true
+    #         "is_active": true,
+    #         "target_device": "curtains_01",
+    #         "target_device_value": 1.0
     #     }
     # }
     

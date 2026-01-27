@@ -86,6 +86,8 @@ struct Event
 	bool triggered;
 	uint32_t lastTrigger;
 	char alertMessage[64];
+	char targetDevice[64];
+	float targetDeviceValue;
 };
 Event events[MAX_EVENTS];
 uint8_t eventCount = 0;
@@ -340,6 +342,8 @@ void handleJsonCommand(char *json)
 			existingEvent->threshold = doc["trigger_threshold"];
 			existingEvent->active = doc["is_active"];
 			strlcpy(existingEvent->alertMessage, doc["alert_message"], 64);
+			strlcpy(existingEvent->targetDevice, doc["target_device"], 64);
+			existingEvent->targetDeviceValue = doc["target_device_value"];
 
 			Serial.println("Event Updated!");
 			updateDisplay("CONFIG", "Event Updated", "", 2000);
@@ -361,6 +365,8 @@ void handleJsonCommand(char *json)
 			e->threshold = doc["trigger_threshold"];
 			e->active = doc["is_active"];
 			strlcpy(e->alertMessage, doc["alert_message"], 64);
+			strlcpy(e->targetDevice, doc["target_device"], 64);
+			e->targetDeviceValue = doc["target_device_value"];
 
 			Serial.println("Event Added!");
 			updateDisplay("CONFIG", "Event Added", "", 2000);
@@ -409,7 +415,7 @@ void checkEvents(uint8_t nodeId, const char *type, float val)
 			// TRIGGER!
 			Serial.print(">>> EVENT: ");
 			Serial.println(e->alertMessage);
-			updateDisplay("ALERT!", e->alertMessage, String(val), 4000);
+			updateDisplay("ALERT!", e->alertMessage, String("Accionando ") + String(e->targetDevice), 4000);
 
 			EventType_t evtRpt;
 			evtRpt.trigger_threshold = e->threshold;
@@ -418,6 +424,8 @@ void checkEvents(uint8_t nodeId, const char *type, float val)
 			evtRpt.sensor_type = e->sensorType;
 			evtRpt.alert_message = e->alertMessage;
 			evtRpt.event_id = e->event_id;
+			evtRpt.target_device = e->targetDevice;
+			evtRpt.target_device_value = e->targetDeviceValue;
 
 			serialbridge_report_event_trigger(nodeId, &evtRpt);
 		}

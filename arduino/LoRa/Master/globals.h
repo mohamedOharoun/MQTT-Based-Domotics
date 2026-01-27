@@ -40,6 +40,8 @@ struct EventType_t
 	EventTriggerType trigger_type;
 	char *alert_message;
 	bool is_active;
+	char *target_device;
+	float target_device_value;
 };
 
 #endif

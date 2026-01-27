@@ -8,6 +8,8 @@ export interface EventType {
 	trigger_type: "above" | "below" | "equal";
 	is_active: boolean;
 	alert_message: string;
+	target_device: string;
+	target_device_value: number;
 }
 
 export interface EventTriggerMessage {

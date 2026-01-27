@@ -21,6 +21,8 @@ const defaultNewEvent: EntryEventType = {
 	msg_type: "event",
 	topic: "example_event_name",
 	alert_message: "Alert triggered!",
+	target_device: "curtains",
+	target_device_value: 0,
 };
 
 interface EventManagerViewProps {
@@ -85,6 +87,8 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 			is_active: newEvent.is_active,
 			msg_type: "event",
 			alert_message: newEvent.alert_message || "",
+			target_device: newEvent.target_device,
+			target_device_value: newEvent.target_device_value,
 		};
 
 		publishEvent(createdEvent, createdEvent.event_id);
@@ -103,7 +107,10 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 				trigger_type: event.trigger_type,
 				is_active: !currentState,
 				msg_type: "event",
+				target_device: event.target_device,
+				target_device_value: event.target_device_value,
 			};
+
 			publishEvent(updatedEvent, event.topic);
 		}
 	};
@@ -134,6 +141,8 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 					trigger_type: editFormData.trigger_type || event.trigger_type,
 					is_active: event.is_active,
 					msg_type: "event",
+					target_device: event.target_device,
+					target_device_value: event.target_device_value,
 				};
 				publishEvent(updatedEvent, event.topic);
 			}
@@ -231,6 +240,43 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 						/>
 					</div>
 
+					<div className="flex flex-col gap-2">
+						<label className="text-sm font-medium">Trigger Device</label>
+						<div className="relative">
+							<select
+								value={newEvent.target_device}
+								onChange={(e) =>
+									setNewEvent((prev) => ({
+										...prev,
+										target_device: e.target.value,
+									}))
+								}
+								className={baseSelectClass}
+								defaultValue={"curtains"}
+							>
+								<option value="curtains">Curtains</option>
+								<option value="door">Door</option>
+							</select>
+							<span className="pointer-events-none absolute inset-y-0 right-4 flex items-center text-gray-300 text-sm">▾</span>
+						</div>
+					</div>
+
+					<div className="flex flex-col gap-2">
+						<label className="text-sm font-medium">Trigger Device Value</label>
+						<input
+							type="number"
+							value={newEvent.target_device_value}
+							min={0}
+							onChange={(e) =>
+								setNewEvent((prev) => ({
+									...prev,
+									target_device_value: parseFloat(e.target.value),
+								}))
+							}
+							className="px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
+						/>
+					</div>
+
 					<div className="flex gap-2 md:col-span-2">
 						<button
 							onClick={handleCreateEvent}
@@ -255,6 +301,8 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 							<th className="px-6 py-4 font-semibold">Threshold</th>
 							<th className="px-6 py-4 font-semibold">Threshold Type</th>
 							<th className="px-6 py-4 font-semibold">Trigger Message</th>
+							<th className="px-6 py-4 font-semibold">Trigger Device</th>
+							<th className="px-6 py-4 font-semibold">Trigger Device Value</th>
 							<th className="px-6 py-4 font-semibold">Status</th>
 							<th className="px-6 py-4 font-semibold">Actions</th>
 						</tr>
@@ -262,7 +310,7 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 					<tbody className="divide-y divide-gray-800">
 						{eventsToEdit.length === 0 ? (
 							<tr>
-								<td colSpan={8} className="px-6 py-12 text-center text-gray-500">
+								<td colSpan={10} className="px-6 py-12 text-center text-gray-500">
 									No events configured. Create one above to get started.
 								</td>
 							</tr>
@@ -349,6 +397,25 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 													className="px-2 py-1 bg-[#2a2a2a] border border-gray-700 rounded text-sm w-20 focus:outline-none focus:border-blue-500"
 												/>
 											</td>
+											<td className="px-4 py-3">{capitalize(event.target_device)}</td>
+											<td className="px-4 py-3">
+												<input
+													type="number"
+													min={0}
+													value={
+														editFormData.target_device_value !== undefined
+															? editFormData.target_device_value
+															: event.target_device_value
+													}
+													onChange={(e) =>
+														handleEditChange(
+															"target_device_value",
+															parseFloat(e.target.value)
+														)
+													}
+													className="px-2 py-1 bg-[#2a2a2a] border border-gray-700 rounded text-sm w-20 focus:outline-none focus:border-blue-500"
+												/>
+											</td>
 										</>
 									) : (
 										<>
@@ -357,6 +424,8 @@ export default function EventManagerView({ mqtt_client, MAX_EVENTS }: EventManag
 											<td className="px-4 py-3">{event.trigger_threshold}</td>
 											<td className="px-4 py-3">{capitalize(event.trigger_type)}</td>
 											<td className="px-4 py-3">{event.alert_message || "-"}</td>
+											<td className="px-4 py-3">{capitalize(event.target_device)}</td>
+											<td className="px-4 py-3">{event.target_device_value}</td>
 										</>
 									)}
 									<td className="px-4 py-3">
