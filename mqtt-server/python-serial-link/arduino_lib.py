@@ -2,7 +2,6 @@ import serial
 import time
 import json
 
-from main import BAUD_RATE
 import mqtt_payload
 import mqtt_lib
 

@@ -46,7 +46,6 @@ uint32_t lastSensorReadTime = 0;
 void setup()
 {
 	Serial.begin(115200);
-	// REMOVED: while(!Serial);  <-- CAUSA DEL BLOQUEO
 	delay(2000);
 
 	Wire.begin();
@@ -66,11 +65,9 @@ void setup()
 	LoRa.enableCrc();
 	LoRa.setSyncWord(0x12);
 	LoRa.onTxDone(TxFinished);
-	LoRa.receive(); // Put in receive mode (standard standby)
+	LoRa.receive();
 
 	Serial.println("ESCLAVO ULTRASONICO (BINARIO) LISTO");
-
-	// Force immediate read
 	lastSensorReadTime = millis() - SENSOR_READ_INTERVAL;
 }
 
@@ -85,7 +82,7 @@ float readSRF02Distance()
 	delay(SRF02_MEASUREMENT_DELAY);
 
 	Wire.beginTransmission(SRF02_ADDR);
-	Wire.write(0x02); // Result Register
+	Wire.write(0x02);
 	Wire.endTransmission();
 
 	Wire.requestFrom(SRF02_ADDR, (uint8_t)2);
@@ -121,7 +118,7 @@ void loop()
 
 		uint8_t payload[6];
 		payload[0] = MSG_TYPE_SENSOR;
-		payload[1] = SENSOR_ID_ULTRA; // 0x01
+		payload[1] = SENSOR_ID_ULTRA;
 		payload[2] = SENSOR_TYPE_DIST;
 		payload[3] = (distInt >> 8) & 0xFF;
 		payload[4] = distInt & 0xFF;

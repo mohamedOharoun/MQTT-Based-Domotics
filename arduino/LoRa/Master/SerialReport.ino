@@ -11,7 +11,6 @@ String serialbridge_node_hex_to_string(uint8_t node_hex)
 	String node_str = "node_";
 	String node_type;
 
-	// Explicitly check addresses
 	if (node_hex == SENSOR_ID_ULTRA)
 	{
 		node_type = "ULTRASONIC_";
@@ -27,7 +26,6 @@ String serialbridge_node_hex_to_string(uint8_t node_hex)
 
 	node_str += node_type;
 
-	// Add the hex ID for uniqueness
 	if (node_hex < 0x10)
 		node_str += "0";
 	node_str += String(node_hex, HEX);
