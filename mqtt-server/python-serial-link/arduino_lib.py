@@ -87,16 +87,33 @@ def serial_to_mqtt_loop(mqtt_client: mqtt_lib.mqtt.Client) -> None:
             frame_buffer = ""
 
         time.sleep(0.02)
+        
+def framed_payload(raw_payload: str) -> str:
+    return f"{START_MARKER}{raw_payload}{END_MARKER}\n"
 
 def write_event_update_to_serial(event_trigger: mqtt_payload.EventType) -> None:
-    if _active_serial and _active_serial.is_open:
+    if _active_serial and _active_serial.is_open:        
         raw_payload = mqtt_payload.to_raw_payload(event_trigger)
-        framed_payload = f"{START_MARKER}{raw_payload}{END_MARKER}\n"
+        framed_payload_str = framed_payload(raw_payload)
         try:
-            _active_serial.write(framed_payload.encode('utf-8', errors='replace'))
-            print(f"MQTT → serial  sent event update: {framed_payload.strip()!r}")
+            _active_serial.write(framed_payload_str.encode('utf-8', errors='replace'))
+            print(f"MQTT → serial  sent event update: {framed_payload_str.strip()!r}")
         except Exception as e:
             print(f"Serial write error: {e}")
+            
+def write_event_delete_to_serial(event_id: str) -> None:
+    if _active_serial and _active_serial.is_open:
+        raw_payload = json.dumps({
+            "msg_type": "clear_event",
+            "event_id": event_id
+        })
+        framed_payload_str = framed_payload(raw_payload)
+        
+        try:
+            _active_serial.write(framed_payload_str.encode('utf-8', errors='replace'))
+            print(f"MQTT → serial  sent event delete: {framed_payload_str.strip()!r}")
+        except Exception as e:
+            print(f"Serial write error: {e}") 
             
 def on_mqtt_message(client, userdata, msg: mqtt_lib.mqtt.MQTTMessage):
     try:
@@ -109,6 +126,10 @@ def on_mqtt_message(client, userdata, msg: mqtt_lib.mqtt.MQTTMessage):
     
     # downlink from params/event/#
     if msg.topic.startswith(mqtt_lib.DOWNLINK_TOPIC[:-1]):
+        if (payload == ""):
+            write_event_delete_to_serial(msg.topic.split('/')[-1])
+            return
+        
         try:
             event_payload = mqtt_payload.parse_raw_payload(payload)
             if isinstance(event_payload, mqtt_payload.EventType):

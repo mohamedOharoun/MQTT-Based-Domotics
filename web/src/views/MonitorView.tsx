@@ -63,10 +63,12 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
     const eventMsg = message as EventType;
     return (
       <div className="text-xs">
+        <div>Event ID: {eventMsg.event_id}</div>
         <div>Sensor: {eventMsg.sensor_type}</div>
         <div>Threshold: {eventMsg.trigger_threshold}</div>
         <div>Type: {eventMsg.trigger_type}</div>
         <div>Active: {eventMsg.is_active ? "Yes" : "No"}</div>
+        <div>Message: {eventMsg.alert_message}</div>
       </div>
     );
   };
@@ -87,6 +89,7 @@ export default function MonitorView({ connectionStatus }: MonitorViewProps) {
 		const alertMsg = message as EventTriggerMessage;
 		return (
 			<div className="text-xs">
+				<div>Event ID: {alertMsg.event.event_id}</div>
 				<div>Event Sensor: {alertMsg.event.sensor_type}</div>
 				<div>Trigger Threshold: {alertMsg.event.trigger_threshold}</div>
 				<div>Trigger Type: {alertMsg.event.trigger_type}</div>

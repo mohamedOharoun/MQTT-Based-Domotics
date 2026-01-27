@@ -78,6 +78,7 @@ String dispLine1, dispLine2, dispLine3;
 const uint8_t MAX_EVENTS = 10;
 struct Event
 {
+	char event_id[16];
 	char sensorType[16];
 	uint8_t triggerType; // 0:Above, 1:Below, 2:Equal
 	float threshold;
@@ -117,7 +118,7 @@ void updateDisplay(String l1, String l2, String l3, int duration = 0)
 
 void applyConfiguration()
 {
-	LoRa.idle(); // Put radio in standby
+	LoRa.idle();
 	delay(50);
 	LoRa.setSignalBandwidth(long(bandwidth_kHz[currentBW]));
 	LoRa.setSpreadingFactor(currentSF);
@@ -126,16 +127,12 @@ void applyConfiguration()
 	LoRa.setPreambleLength(16);
 	LoRa.enableCrc();
 	LoRa.setSyncWord(0x12);
-	// NOTE: Do NOT call LoRa.receive() here for Polling Mode.
-	// parsePacket() handles the mode switch automatically.
 }
 
 /* ===================== SETUP ===================== */
 void setup()
 {
 	Serial.begin(115200);
-	// Removed "while(!Serial)" to prevent battery hang,
-	// but ensure you open monitor quickly!
 	delay(2000);
 
 	if (!display.begin(SSD1306_SWITCHCAPVCC, 0x3D))
@@ -179,30 +176,27 @@ void loop()
 {
 	static uint32_t lastBeat = 0;
 
-	// 1. Heartbeat (Visual Debug)
 	if (millis() - lastBeat > 1000)
 	{
 		lastBeat = millis();
-		// If these dots stop, your code is FROZEN (Serial buffer full or I2C hang)
-		Serial.print(".");
+		Serial.print("."); // Debug heartbeat
 	}
 
-	// 2. LoRa Polling
 	int packetSize = LoRa.parsePacket();
 	if (packetSize)
 	{
-		Serial.println("\nRX!"); // Debug print
+		Serial.println("\nRX!");
 		processPacket(packetSize);
 	}
 
-	// 3. Serial Input (Python)
+	// Serial bridge receive
 	while (Serial.available())
 	{
 		char c = Serial.read();
 		if (!frameInprog)
 		{
-			if (c == 'c')
-			{ // Quick check for start of "comm:start$"
+			if (c == 'c') // Check for start of frame marker
+			{
 				serialBuf[bufIdx++] = c;
 			}
 			else if (bufIdx > 0)
@@ -225,8 +219,9 @@ void loop()
 			serialBuf[bufIdx++] = c;
 			if (bufIdx >= 511)
 				bufIdx = 0; // Prevent overflow
+
 			if (c == 'd' && strstr(serialBuf, FRAME_END))
-			{ // End detected
+			{
 				char *end = strstr(serialBuf, FRAME_END);
 				*end = 0;
 				handleJsonCommand(serialBuf);
@@ -237,7 +232,6 @@ void loop()
 		}
 	}
 
-	// 4. Display Timeout
 	if (currentDisplayState != DISPLAY_IDLE && millis() > displayTimer && displayTimer != 0)
 	{
 		currentDisplayState = DISPLAY_IDLE;
@@ -330,6 +324,7 @@ void handleJsonCommand(char *json)
 			return;
 		Event *e = &events[eventCount++];
 
+		strlcpy(e->event_id, doc["event_id"], 16);
 		strlcpy(e->sensorType, doc["sensor_type"], 16);
 		String trig = doc["trigger_type"];
 		e->triggerType = (trig == "below") ? 1 : (trig == "equal" ? 2 : 0);
@@ -339,6 +334,23 @@ void handleJsonCommand(char *json)
 
 		Serial.println("Event Added!");
 		updateDisplay("CONFIG", "Event Added", "", 2000);
+	}
+	else if (strcmp(type, "clear_event") == 0)
+	{
+		const char *eventId = doc["event_id"];
+		for (int i = 0; i < eventCount; i++)
+		{
+			if (strcmp(events[i].event_id, eventId) == 0)
+			{
+				for (int j = i; j < eventCount - 1; j++)
+					events[j] = events[j + 1];
+
+				eventCount--;
+				Serial.println("Event Removed");
+				updateDisplay("CONFIG", "Event Removed", "", 2000);
+				break;
+			}
+		}
 	}
 	else if (strcmp(type, "clear_events") == 0)
 	{
@@ -380,6 +392,7 @@ void checkEvents(uint8_t nodeId, const char *type, float val)
 			evtRpt.trigger_type = (e->triggerType == 0) ? TRIGGER_ABOVE : (e->triggerType == 1 ? TRIGGER_BELOW : TRIGGER_EQUAL);
 			evtRpt.sensor_type = e->sensorType;
 			evtRpt.alert_message = e->alertMessage;
+			evtRpt.event_id = e->event_id;
 
 			serialbridge_report_event_trigger(nodeId, &evtRpt);
 		}

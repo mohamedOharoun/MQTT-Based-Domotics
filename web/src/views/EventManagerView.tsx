@@ -8,7 +8,12 @@ type EntryEventType = EventType & {
 	topic: string;
 }
 
+const eventIdGenerator = () => {
+	return Math.random().toString(16).slice(2, 8);
+}
+
 const defaultNewEvent: EntryEventType = {
+	event_id: eventIdGenerator(),
 	sensor_type: "light",
 	trigger_threshold: 500.0,
 	trigger_type: "above",
@@ -65,18 +70,9 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 	const [newEvent, setNewEvent] = useState<EntryEventType>(defaultNewEvent);
 	const handleCreateEvent = async () => {
 		console.log("Creating event:", newEvent);
-		if (newEvent.topic.trim() === "") {
-			alert("Event name cannot be empty");
-			return;
-		}
-
-		const normalizedNew = normalizeTopic(newEvent.topic);
-		if (eventsToEdit.some((e) => normalizeTopic(e.topic) === normalizedNew)) {
-			alert("An event with this name already exists");
-			return;
-		}
 
 		const createdEvent: EventType = {
+			event_id: eventIdGenerator(),
 			sensor_type: newEvent.sensor_type,
 			trigger_threshold: newEvent.trigger_threshold < 0 ? 0 : newEvent.trigger_threshold,
 			trigger_type: newEvent.trigger_type,
@@ -85,7 +81,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			alert_message: newEvent.alert_message || "",
 		};
 
-		publishEvent(createdEvent, newEvent.topic);
+		publishEvent(createdEvent, createdEvent.event_id);
 		setNewEvent(defaultNewEvent);
 	};
 
@@ -94,6 +90,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 		const event = eventsToEdit.find((e) => e.id === eventId);
 		if (event) {
 			const updatedEvent: EventType = {
+				event_id: event.event_id,
 				sensor_type: event.sensor_type,
 				trigger_threshold: event.trigger_threshold,
 				alert_message: event.alert_message || "",
@@ -124,6 +121,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			const event = eventsToEdit.find((e) => e.id === editingEventId);
 			if (event) {
 				const updatedEvent: EventType = {
+					event_id: event.event_id,
 					sensor_type: editFormData.sensor_type || event.sensor_type,
 					trigger_threshold: editFormData.trigger_threshold !== undefined ? editFormData.trigger_threshold : event.trigger_threshold,
 					alert_message: editFormData.alert_message || event.alert_message || "",
@@ -154,7 +152,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 			<div className="bg-[#1a1a1a] rounded-lg shadow-xl border border-gray-800 p-6">
 				<h2 className="text-lg font-semibold mb-4">Create New Event</h2>
 				<div className="flex justify-evenly items-center">
-					<div className="flex flex-col gap-2">
+					{/* <div className="flex flex-col gap-2">
 						<label className="text-sm font-medium">Event Name</label>
 						<input
 							type="text"
@@ -167,7 +165,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 							}
 							className="px-3 py-2 bg-[#2a2a2a] border border-gray-700 rounded text-sm focus:outline-none focus:border-blue-500"
 						/>
-					</div>
+					</div> */}
 
 					<div className="flex flex-col gap-2">
 						<label className="text-sm font-medium">Sensor Type</label>
@@ -258,6 +256,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 					<thead className="bg-[#2a2a2a] border-b border-gray-700 sticky top-0">
 						<tr>
 							<th className="px-6 py-4 text-left font-semibold">Topic</th>
+							<th className="px-6 py-4 text-left font-semibold">Event ID</th>
 							<th className="px-6 py-4 text-left font-semibold">Sensor Type</th>
 							<th className="px-6 py-4 text-left font-semibold">Threshold</th>
 							<th className="px-6 py-4 text-left font-semibold">Threshold Type</th>
@@ -358,6 +357,7 @@ export default function EventManagerView({ mqtt_client }: EventManagerViewProps)
 										</>
 									) : (
 										<>
+											<td className="px-4 py-3">{event.event_id}</td>
 											<td className="px-4 py-3">{capitalize(event.sensor_type)}</td>
 											<td className="px-4 py-3">{event.trigger_threshold}</td>
 											<td className="px-4 py-3">{capitalize(event.trigger_type)}</td>

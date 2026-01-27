@@ -89,6 +89,7 @@ class SensorData:
         
 @dataclass
 class EventType:
+    event_id: str
     msg_type: MsgType
     sensor_type: SensorType
     trigger_threshold: float | int
@@ -98,6 +99,7 @@ class EventType:
     
     # EventType example:
     #     {
+    #        "event_id": "chgyqn",
     #         "msg_type": "event",
     #         "sensor_type": "ultrasonic",
     #         "trigger_threshold": 10.0,
@@ -109,6 +111,7 @@ class EventType:
     @staticmethod
     def from_dict(data: dict) -> 'EventType':
         return EventType(
+            event_id=data["event_id"],
             msg_type=data["msg_type"],
             sensor_type=data["sensor_type"],
             trigger_threshold=data["trigger_threshold"],

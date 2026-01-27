@@ -1,6 +1,7 @@
 import type { SensorType } from "./sensor_data";
 
 export interface EventType {
+	event_id: string;
 	msg_type: "event";
 	sensor_type: SensorType;
 	trigger_threshold: number;

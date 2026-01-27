@@ -34,6 +34,7 @@ enum EventTriggerType
 
 struct EventType_t
 {
+	char *event_id;
 	char *sensor_type;
 	float trigger_threshold;
 	EventTriggerType trigger_type;

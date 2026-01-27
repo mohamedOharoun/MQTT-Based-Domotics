@@ -96,6 +96,7 @@ void serialbridge_report_event_trigger(uint8_t node_hex_id, EventType_t *event)
 	event_doc["trigger_type"] = trigger_type_str;
 	event_doc["is_active"] = event->is_active;
 	event_doc["alert_message"] = event->alert_message;
+	event_doc["event_id"] = event->event_id;
 
 	String json;
 	serializeJson(doc, json);
