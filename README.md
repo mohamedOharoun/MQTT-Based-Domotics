@@ -1,5 +1,10 @@
 # MQTT Based Domotics
 
+## Authors
+- Wail Ben El Hassane Boudhar
+- Félix Miguel Velásquez
+- Mohamed O. Haroun Zarkik
+
 ## Table of Contents
 
 - [Arduino node mesh and sensors](#arduino-node-mesh-and-sensors)
