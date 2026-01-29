@@ -64,8 +64,8 @@ void setup()
 	}
 	Serial.println("OK");
 
-	light.setGain(0.125);
-	light.setIntegTime(100);
+	light.setGain(1.0);			 // Use normal gain (0.125 is too low and causes saturation)
+	light.setIntegTime(100); // 100ms integration
 
 	if (!LoRa.begin(868E6))
 	{
@@ -97,10 +97,12 @@ void loop()
 		lastSendTime = millis();
 
 		float luxVal = light.readLight();
+		uint16_t rawALS = light.readALS();
 
 		Serial.print("Lectura Sensor: ");
 		Serial.print(luxVal);
-		Serial.println(" lux");
+		Serial.print(" lux | ALS: ");
+		Serial.println(rawALS);
 
 		uint16_t luxInt = (uint16_t)luxVal;
 
@@ -112,19 +114,21 @@ void loop()
 		else
 			state = LIGHT_STATE_BRIGHT;
 
-		uint8_t payload[6];
+		uint8_t payload[8];
 		payload[0] = MSG_TYPE_SENSOR;
 		payload[1] = SENSOR_ID_LIGHT;
 		payload[2] = SENSOR_TYPE_LUX;
 		payload[3] = (luxInt >> 8) & 0xFF;
 		payload[4] = luxInt & 0xFF;
 		payload[5] = state;
+		payload[6] = (rawALS >> 8) & 0xFF;
+		payload[7] = rawALS & 0xFF;
 
 		Serial.println("Enviando paquete LoRa...");
 
 		transmitting = true;
 		txDoneFlag = false;
-		sendMessage(payload, 6, msgCount++);
+		sendMessage(payload, 8, msgCount++);
 	}
 
 	if (transmitting && txDoneFlag)

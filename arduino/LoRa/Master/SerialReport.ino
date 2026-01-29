@@ -60,7 +60,7 @@ void serialbridge_report_ultrasonic_sensor_data(uint8_t node_hex_id, uint32_t ms
 	serialbridge_report_packet(jsonString.c_str());
 }
 
-void serialbridge_report_light_sensor_data(uint8_t node_hex_id, uint32_t msg_id, double lux, int32_t als, const char *state)
+void serialbridge_report_light_sensor_data(uint8_t node_hex_id, uint32_t msg_id, uint32_t lux, int32_t als, const char *state)
 {
 	StaticJsonDocument<256> doc;
 	doc["node_id"] = serialbridge_node_hex_to_string(node_hex_id).c_str();
