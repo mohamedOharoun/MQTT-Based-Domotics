@@ -97,12 +97,9 @@ void loop()
 		lastSendTime = millis();
 
 		float luxVal = light.readLight();
-		uint16_t rawALS = light.readALS();
 
 		Serial.print("Lectura Sensor: ");
-		Serial.print(luxVal);
-		Serial.print(" lux | ALS: ");
-		Serial.println(rawALS);
+		Serial.println(luxVal);
 
 		uint16_t luxInt = (uint16_t)luxVal;
 
@@ -114,21 +111,19 @@ void loop()
 		else
 			state = LIGHT_STATE_BRIGHT;
 
-		uint8_t payload[8];
+		uint8_t payload[6];
 		payload[0] = MSG_TYPE_SENSOR;
 		payload[1] = SENSOR_ID_LIGHT;
 		payload[2] = SENSOR_TYPE_LUX;
 		payload[3] = (luxInt >> 8) & 0xFF;
 		payload[4] = luxInt & 0xFF;
 		payload[5] = state;
-		payload[6] = (rawALS >> 8) & 0xFF;
-		payload[7] = rawALS & 0xFF;
 
 		Serial.println("Enviando paquete LoRa...");
 
 		transmitting = true;
 		txDoneFlag = false;
-		sendMessage(payload, 8, msgCount++);
+		sendMessage(payload, 6, msgCount++);
 	}
 
 	if (transmitting && txDoneFlag)

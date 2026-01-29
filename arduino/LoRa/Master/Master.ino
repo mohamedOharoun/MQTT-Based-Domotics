@@ -295,7 +295,6 @@ void processPacket(int size)
 	{
 		uint16_t lux = (buf[3] << 8) | buf[4];
 		uint8_t st = buf[5];
-		uint16_t als = (buf[6] << 8) | buf[7];
 		String sStr = (st == 2) ? "Bright" : (st == 1) ? "Dim"
 																									 : "Dark";
 
@@ -308,7 +307,7 @@ void processPacket(int size)
 		if (currentDisplayState == DISPLAY_IDLE)
 			updateDisplay("LIGHT", String(lux) + "lx", sStr);
 
-		serialbridge_report_light_sensor_data(sender, msgId, (double)lux, (int32_t)als, sStr.c_str());
+		serialbridge_report_light_sensor_data(sender, msgId, (double)lux, (int32_t)lux, sStr.c_str());
 		checkEvents(id, "light", (float)lux);
 	}
 }
