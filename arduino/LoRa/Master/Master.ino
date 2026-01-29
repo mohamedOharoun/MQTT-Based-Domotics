@@ -1,6 +1,5 @@
 /* ---------------------------------------------------------------------
  * NODO MAESTRO (FINAL STABLE VERSION)
- * Fixes: Removes Serial Blocking risks & LoRa Mode conflicts
  * ---------------------------------------------------------------------
  */
 
@@ -273,10 +272,7 @@ void processPacket(int size)
 	{
 		uint16_t dist = (buf[3] << 8) | buf[4];
 		uint8_t st = buf[5];
-		String sStr = (st == 1) ? "Cerca" : (st == 2) ? "Medio"
-																		: (st == 3)		? "Lejos"
-																									: "Err";
-
+		String sStr = (st == 1) ? "Cerca" : (st == 2) ? "Medio" : (st == 3) ? "Lejos" : "Err";
 		Serial.print(" ULTRA [0x");
 		Serial.print(sender, HEX);
 		Serial.print("] ");
@@ -295,9 +291,7 @@ void processPacket(int size)
 	{
 		uint16_t lux = (buf[3] << 8) | buf[4];
 		uint8_t st = buf[5];
-		String sStr = (st == 2) ? "Bright" : (st == 1) ? "Dim"
-																									 : "Dark";
-
+		String sStr = (st == 2) ? "Bright" : (st == 1) ? "Dim" : "Dark";
 		Serial.print(" LIGHT [0x");
 		Serial.print(sender, HEX);
 		Serial.print("] ");
@@ -412,7 +406,6 @@ void checkEvents(uint8_t nodeId, const char *type, float val)
 			e->triggered = true;
 			e->lastTrigger = millis();
 
-			// TRIGGER!
 			Serial.print(">>> EVENT: ");
 			Serial.println(e->alertMessage);
 			updateDisplay("ALERT!", e->alertMessage, String("Accionando ") + String(e->targetDevice), 4000);
